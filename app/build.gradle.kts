@@ -53,7 +53,14 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(libs.hilt.android)
+    implementation(libs.material)
     kapt(libs.hilt.android.compiler)
+    implementation (libs.androidx.hilt.navigation.compose)
+    implementation (libs.androidx.animation)
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation ("androidx.compose.material:material-icons-extended:1.7.5")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
