@@ -20,8 +20,8 @@ class TicketRepositoryImpl @Inject constructor(
                 flightCode = "VN123",
                 arrivalTime = Date(2024, 12, 6, 10, 30),
                 departureTime = Date(2024, 12, 6, 8, 0),
-                arrivalAirportName = "Noi Bai International Airport",
-                departureAirportName = "Tan Son Nhat International Airport",
+                arrivalAirportName = "Hà nội",
+                departureAirportName = "Hồ Chí Minh",
                 airlineName = "Vietnam Airlines",
                 luggage = 20.0
             ),
@@ -32,8 +32,8 @@ class TicketRepositoryImpl @Inject constructor(
                 flightCode = "VN456",
                 arrivalTime = Date(2024, 12, 7, 12, 0),
                 departureTime = Date(2024, 12, 7, 9, 30),
-                arrivalAirportName = "Da Nang International Airport",
-                departureAirportName = "Noi Bai International Airport",
+                arrivalAirportName = "Hà nội",
+                departureAirportName = "Hồ Chí Minh",
                 airlineName = "VietJet Air",
                 luggage = 15.0
             ),
@@ -44,8 +44,8 @@ class TicketRepositoryImpl @Inject constructor(
                 flightCode = "VN789",
                 arrivalTime = Date(2024, 12, 8, 11, 45),
                 departureTime = Date(2024, 12, 8, 9, 15),
-                arrivalAirportName = "Cam Ranh International Airport",
-                departureAirportName = "Da Nang International Airport",
+                arrivalAirportName = "Hà nội",
+                departureAirportName = "Hồ Chí Minh",
                 airlineName = "Bamboo Airways",
                 luggage = 10.0
             )

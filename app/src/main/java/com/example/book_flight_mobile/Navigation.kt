@@ -13,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -21,18 +20,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.book_flight_mobile.ui.screens.HomeScreen
 import com.example.book_flight_mobile.ui.screens.HomeViewModel
 import com.example.book_flight_mobile.ui.screens.profile.ProfileModelView
 import com.example.book_flight_mobile.ui.screens.profile.ProfileScreen
-import com.example.book_flight_mobile.ui.screens.profile.detail.HistoryTicketScreen
+import com.example.book_flight_mobile.ui.screens.ticket.HistoryTicketScreen
 import com.example.book_flight_mobile.ui.screens.search.SearchModelView
 import com.example.book_flight_mobile.ui.screens.search.SearchScreen
+import com.example.book_flight_mobile.ui.screens.ticket.detail.DetailTicketScreen
 
 
 sealed class Screen(val route:String){
     object Home:Screen("home")
     object Login:Screen("login")
+    object TicketHistoryDetail:Screen("ticket_history_detail")
     object Detail:Screen("detail")
     object Search:Screen("search")
     object HistoryTicket:Screen("booking_history")
@@ -99,8 +103,11 @@ fun Navigation() {
                 )
             }
             composable(Screen.Profile.route) {
+                val profileModelView: ProfileModelView = hiltViewModel()
                 ProfileScreen(
                     navController = navController,
+                    viewModel = profileModelView,
+                    mainViewModel = mainViewModel
                 )
             }
             composable(Screen.HistoryTicket.route) {
@@ -110,6 +117,25 @@ fun Navigation() {
                     viewModel = profileModelView,
                     mainViewModel = mainViewModel
                 )
+            }
+            composable(
+                Screen.TicketHistoryDetail.route + "?id={id}",
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.LongType
+                        defaultValue = -1
+                    }
+                )
+            ) { backStackEntry ->
+                val ticketId = backStackEntry.arguments?.getLong("id") ?: -1
+                if (ticketId != -1L) {
+                    DetailTicketScreen(
+                        navController = navController,
+                        viewModel = hiltViewModel(),
+                        mainViewModel = mainViewModel,
+                        id = ticketId
+                    )
+                }
             }
         }
     }
