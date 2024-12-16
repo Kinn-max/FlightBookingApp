@@ -16,7 +16,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -59,8 +58,12 @@ dependencies {
     implementation (libs.androidx.animation)
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
-    implementation ("androidx.compose.material:material-icons-extended:1.7.5")
-
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("io.coil-kt:coil-compose:2.3.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+    implementation("com.jakewharton.threetenabp:threetenabp:1.4.4")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

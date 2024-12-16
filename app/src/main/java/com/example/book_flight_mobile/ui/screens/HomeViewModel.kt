@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.AirportResponse
+import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.repositories.AirportRepository
+import com.example.book_flight_mobile.repositories.FlightRepository
 import com.example.book_flight_mobile.repositories.MainLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,29 +15,28 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeUiState(
-    val notes:List<AirportResponse> = emptyList(),
+    val flight:List<FlightResponse> = emptyList(),
     val status:LoadStatus = LoadStatus.Innit(),
-    val selectedIndex:Int = -1
 )
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val log: MainLog?,
-    private val airportRepository: AirportRepository
+    private val flightRepository: FlightRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        loadAirports()
+        loadHomeApp()
     }
 
-    private fun loadAirports() {
-        viewModelScope.launch {
+    private fun loadHomeApp(){
+    viewModelScope.launch {
             _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
             try {
-                val airports = airportRepository.loadAirport()
+                val flights = flightRepository.loadFlightHome()
                 _uiState.value = _uiState.value.copy(
-                    notes = airports,
+                    flight = flights,
                     status = LoadStatus.Success()
                 )
             } catch (e: Exception) {
@@ -43,4 +44,5 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
 }

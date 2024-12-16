@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowRightAlt
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -136,7 +137,7 @@ fun HistoryTicketScreen(
                                             }
                                             Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                                                 Icon(
-                                                    imageVector = Icons.Default.ArrowForward,
+                                                    imageVector = Icons.Default.ArrowRightAlt,
                                                     contentDescription = "Arrow Right",
                                                     modifier = Modifier.size(24.dp)
                                                 )

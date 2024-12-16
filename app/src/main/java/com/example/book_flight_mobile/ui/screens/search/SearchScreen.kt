@@ -1,20 +1,16 @@
 package com.example.book_flight_mobile.ui.screens.search
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.icu.util.Calendar
-import android.widget.Toast
-import androidx.activity.ComponentActivity
+import android.widget.DatePicker
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.EventSeat
 import androidx.compose.material.icons.filled.FlightLand
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material3.*
@@ -27,26 +23,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.fragment.app.FragmentActivity
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
 
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.FlightResponse
-import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 
 @SuppressLint("NewApi")
@@ -58,14 +48,16 @@ fun SearchScreen(
     mainViewModel: MainViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    var offsetX by remember { mutableStateOf(0f) }
     val availableDestinations = listOf("Hà Nội", "Đà Nẵng", "Hồ Chí Minh", "Nha Trang")
-    var selectedDestination by remember { mutableStateOf(availableDestinations[0]) }
-    var selectedDate by remember { mutableStateOf("Chưa chọn ngày") }
-    var showDatePickerDialog by remember { mutableStateOf(false) }
-
-
+    val availableSeats = listOf("Business","Economy")
+    var selectedSeat by remember { mutableStateOf(availableSeats[0]) }
+    var selectedDeparture by remember { mutableStateOf(availableDestinations[0]) }
+    var selectedArrive by remember { mutableStateOf(availableDestinations[1]) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    var selectedDate = datePickerState.selectedDateMillis?.let {
+        convertMillisToDate(it)
+    } ?: ""
     LaunchedEffect(Unit) {
         viewModel.loadSearchBase()
     }
@@ -116,34 +108,6 @@ fun SearchScreen(
                         )
                     }
                 } else {
-                    LazyRow(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .background(Color.Gray)
-                    ) {
-                        items(10) { index ->
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .background(Color.White)
-                                    .padding(4.dp)
-                                    .zIndex(1f)
-                                    .offset { IntOffset(offsetX.toInt(), 0) }
-                                    .pointerInput(Unit) {
-                                        detectHorizontalDragGestures { _, dragAmount ->
-                                            offsetX += dragAmount
-                                        }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                               Text("hi")
-                            }
-                        }
-                    }
-
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -170,8 +134,8 @@ fun SearchScreen(
                                     SelectDropdown(
                                         label = "Điểm đi",
                                         options = availableDestinations,
-                                        selectedOption = selectedDestination,
-                                        onOptionSelected = { selectedDestination = it }
+                                        selectedOption = selectedDeparture,
+                                        onOptionSelected = { selectedDeparture = it }
                                     )
                                 }
 
@@ -188,46 +152,46 @@ fun SearchScreen(
                                     SelectDropdown(
                                         label = "Điểm đến",
                                         options = availableDestinations,
-                                        selectedOption = selectedDestination,
-                                        onOptionSelected = { selectedDestination = it }
+                                        selectedOption = selectedArrive,
+                                        onOptionSelected = { selectedArrive = it }
                                     )
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                Box(
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Ngày đi")
-                                    Text(
-                                        text = selectedDate,
-                                        modifier = Modifier
-                                            .clickable {
-                                                showDatePickerDialog = true
+                                    OutlinedTextField(
+                                        value = selectedDate,
+                                        onValueChange = { },
+                                        label = { Text("Ngày khởi hành") },
+                                        readOnly = true,
+                                        trailingIcon = {
+                                            IconButton(onClick = { showDatePicker = !showDatePicker }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.DateRange,
+                                                    contentDescription = "Select date"
+                                                )
                                             }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(64.dp)
                                     )
-                                }
 
-                                if (showDatePickerDialog) {
-                                    val datePicker = MaterialDatePicker.Builder.datePicker()
-                                        .setTitleText("Chọn ngày đi")
-                                        .build()
-                                    datePicker.addOnPositiveButtonClickListener { selection ->
-                                        val date = LocalDate.ofEpochDay(selection / 86400000L)
-                                        selectedDate = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                        showDatePickerDialog = false
-                                    }
-
-                                    val context = LocalContext.current
-                                    val activity = context as? Activity
-                                    activity?.let {
-                                        val fragmentTransaction = (it as FragmentActivity).supportFragmentManager.beginTransaction()
-                                        datePicker.show(fragmentTransaction, "DATE_PICKER")
+                                    if (showDatePicker) {
+                                        DatePickerDialog(
+                                            state = datePickerState,
+                                            onDismissRequest = { showDatePicker = false },
+                                            onDateSelected = {
+                                                showDatePicker = false
+                                                selectedDate = convertMillisToDate(it)
+                                            }
+                                        )
                                     }
 
                                 }
-
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Row(
@@ -235,7 +199,16 @@ fun SearchScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text("Hạng ghế")
-                                    Text("hi")
+                                    Icon(
+                                        imageVector = Icons.Filled.EventSeat,
+                                        contentDescription = "Flight"
+                                    )
+                                    SelectDropdown(
+                                        label = "Hạng ghế",
+                                        options = availableSeats,
+                                        selectedOption = selectedSeat,
+                                        onOptionSelected = { selectedSeat = it }
+                                    )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -272,6 +245,48 @@ fun SearchScreen(
             }
         }
     }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerDialog(
+    state: DatePickerState,
+    onDismissRequest: () -> Unit,
+    onDateSelected: (Long) -> Unit
+) {
+    val currentDateMillis = System.currentTimeMillis()
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                .padding(16.dp)
+        ) {
+            Column {
+                DatePicker(
+                    state = state,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        state.selectedDateMillis?.let { onDateSelected(it) }
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Ok")
+                }
+            }
+        }
+    }
+}
+
+
+fun convertMillisToDate(millis: Long?): String {
+    return millis?.let {
+        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        formatter.format(Date(it))
+    } ?: ""
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -369,4 +384,3 @@ fun FlightCard(flight: FlightResponse) {
         }
     }
 }
-
