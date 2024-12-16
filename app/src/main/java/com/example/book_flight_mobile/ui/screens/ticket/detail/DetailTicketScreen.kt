@@ -40,8 +40,6 @@ fun DetailTicketScreen(
     LaunchedEffect(Unit) {
         viewModel.ticketList()
     }
-
-
     Scaffold(
         topBar = {
             TopAppBar(

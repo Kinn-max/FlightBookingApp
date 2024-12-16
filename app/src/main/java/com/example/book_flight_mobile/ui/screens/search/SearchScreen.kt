@@ -32,8 +32,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
+import com.example.book_flight_mobile.Screen
 
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -53,6 +55,8 @@ fun SearchScreen(
     var selectedSeat by remember { mutableStateOf(availableSeats[0]) }
     var selectedDeparture by remember { mutableStateOf(availableDestinations[0]) }
     var selectedArrive by remember { mutableStateOf(availableDestinations[1]) }
+    var nameDeparture by remember { mutableStateOf("SGN") }
+    var nameArrive by remember {mutableStateOf("HAN") }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     var selectedDate = datePickerState.selectedDateMillis?.let {
@@ -213,7 +217,10 @@ fun SearchScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 ElevatedButton(
-                                    onClick = { /* Xử lý tìm chuyến bay */ },
+                                    onClick = {
+                                        val flightRequest = FlightRequest(1L,2L,"07-01-2024","Business")
+                                        navController.navigate("${Screen.SearchList.route}?departureAirport=${flightRequest.departureAirport}&arrivalAirport=${flightRequest.arrivalAirport}&departureTime=${flightRequest.departureTime}&seatClass=${flightRequest.seatClass}&nameDeparture=${nameDeparture}&nameArrive=${nameArrive}")
+                                    },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text("Tìm chuyến bay")

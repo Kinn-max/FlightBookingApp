@@ -1,6 +1,5 @@
 package com.example.book_flight_mobile.ui.screens
 
-import android.media.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,16 +35,15 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.book_flight_mobile.MainViewModel
-import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.FlightResponse
+import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -62,7 +59,7 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            CustomTopBar()
+            CustomTopBar("Hello")
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)  .background(Color(0xFFF5F5FA))) {
@@ -248,7 +245,7 @@ fun BannerCard() {
     }
 }
 @Composable
-fun CustomTopBar() {
+fun CustomTopBar(s: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

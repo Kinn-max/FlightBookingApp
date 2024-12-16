@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.ui.screens.HomeScreen
 import com.example.book_flight_mobile.ui.screens.HomeViewModel
 import com.example.book_flight_mobile.ui.screens.profile.ProfileModelView
@@ -30,6 +31,7 @@ import com.example.book_flight_mobile.ui.screens.profile.ProfileScreen
 import com.example.book_flight_mobile.ui.screens.ticket.HistoryTicketScreen
 import com.example.book_flight_mobile.ui.screens.search.SearchModelView
 import com.example.book_flight_mobile.ui.screens.search.SearchScreen
+import com.example.book_flight_mobile.ui.screens.search.listsearch.SearchListScreen
 import com.example.book_flight_mobile.ui.screens.ticket.detail.DetailTicketScreen
 
 
@@ -41,7 +43,7 @@ sealed class Screen(val route:String){
     object Search:Screen("search")
     object HistoryTicket:Screen("booking_history")
     object Profile:Screen("profile")
-
+    object SearchList:Screen("search_list")
 }
 
 @Composable
@@ -102,6 +104,38 @@ fun Navigation() {
                     mainViewModel = mainViewModel
                 )
             }
+            composable(Screen.SearchList.route +"?departureAirport={departureAirport}&arrivalAirport={arrivalAirport}&departureTime={departureTime}&seatClass={seatClass}&nameDeparture={nameDeparture}&nameArrive={nameArrive}",
+                arguments = listOf(
+                    navArgument("departureAirport") { type = NavType.LongType },
+                    navArgument("arrivalAirport") { type = NavType.LongType },
+                    navArgument("departureTime") { type = NavType.StringType },
+                    navArgument("seatClass") { type = NavType.StringType },
+                    navArgument("nameDeparture") { type = NavType.StringType },
+                    navArgument("nameArrive") { type = NavType.StringType },
+                )
+            ) { backStackEntry ->
+            val departureAirport = backStackEntry.arguments?.getLong("departureAirport") ?: 0L
+            val arrivalAirport = backStackEntry.arguments?.getLong("arrivalAirport") ?: 0L
+            val departureTime = backStackEntry.arguments?.getString("departureTime") ?: ""
+            val seatClass = backStackEntry.arguments?.getString("seatClass") ?: ""
+            val departure = backStackEntry.arguments?.getString("nameDeparture") ?: ""
+            val arrive = backStackEntry.arguments?.getString("nameArrive") ?: ""
+            val flightRequest = FlightRequest(
+                departureAirport = departureAirport,
+                arrivalAirport = arrivalAirport,
+                departureTime = departureTime,
+                seatClass = seatClass
+            )
+            val searchViewModel: SearchModelView = hiltViewModel()
+            SearchListScreen(
+                navController = navController,
+                viewModel = searchViewModel,
+                mainViewModel = mainViewModel,
+                flightRequest = flightRequest,
+                departure=departure,
+                arrive=arrive
+            )
+        }
             composable(Screen.Profile.route) {
                 val profileModelView: ProfileModelView = hiltViewModel()
                 ProfileScreen(

@@ -64,6 +64,8 @@ dependencies {
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
     implementation("com.jakewharton.threetenabp:threetenabp:1.4.4")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
+    implementation("javax.validation:validation-api:2.0.1.Final")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
