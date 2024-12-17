@@ -66,6 +66,7 @@ dependencies {
     implementation("com.jakewharton.threetenabp:threetenabp:1.4.4")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
     implementation("javax.validation:validation-api:2.0.1.Final")
+    implementation ("androidx.compose.material:material:1.5.4")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
