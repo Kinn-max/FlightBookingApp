@@ -88,5 +88,25 @@ class FlightRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getFlightById(id: Long): FlightResponse {
+       delay(500)
+        return FlightResponse(
+            id = 2L,
+            codeFlight = "VN456",
+            departureTime = Date(2024, 12, 4, 14, 30),
+            arrivalTime = Date(2024, 12, 4, 16, 30),
+            departureAirport = "Da Nang International Airport",
+            departureLocation = "Da Nang, Vietnam",
+            arrivalLocation = "Noi Bai International Airport",
+            arrivalAirport = "Hanoi, Vietnam",
+            codeDepartAirport = "DAD",
+            codeArriAirport = "HAN",
+            airline = "Bamboo Airways",
+            logoAirline = "https://example.com/logo/bamboo_airways.png",
+            ecoPrice = 100.0,
+            busPrice = 200.0
+        )
+    }
+
 
 }

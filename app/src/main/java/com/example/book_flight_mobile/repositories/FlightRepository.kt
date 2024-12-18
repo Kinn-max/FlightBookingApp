@@ -6,4 +6,5 @@ import com.example.book_flight_mobile.models.FlightResponse
 interface FlightRepository {
     suspend fun loadFlightHome(): List<FlightResponse>
     suspend fun searchFlight( flightRequest: FlightRequest): List<FlightResponse>
+    suspend fun getFlightById(id:Long): FlightResponse
 }

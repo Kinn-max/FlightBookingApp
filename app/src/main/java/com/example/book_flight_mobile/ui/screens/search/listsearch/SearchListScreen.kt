@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,6 +73,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.rememberModalBottomSheetState
+import com.example.book_flight_mobile.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -120,7 +122,8 @@ fun SearchListScreen(
                     logoAirline = "",
                     ecoPrice = 0.0,
                     busPrice = 0.0
-                )
+                ),
+                navController= navController
             )
         }
         ,
@@ -181,7 +184,7 @@ fun SearchListScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState, flightResponse: FlightResponse) {
+fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState, flightResponse: FlightResponse,navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxHeight(0.6f)
@@ -425,7 +428,7 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
         }
         Button(
             onClick = {
-                // Handle button click action here
+                navController.navigate("${Screen.SummaryTicket.route}?id=${flightResponse.id}")
             },
             modifier = Modifier
                 .fillMaxWidth()

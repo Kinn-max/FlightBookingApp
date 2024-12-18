@@ -2,12 +2,16 @@ package com.example.book_flight_mobile.ui.screens.search
 
 import android.annotation.SuppressLint
 import android.widget.DatePicker
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.EventSeat
@@ -23,20 +27,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
+import com.example.book_flight_mobile.R
 import com.example.book_flight_mobile.Screen
 
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
+import com.example.book_flight_mobile.ui.screens.BannerCard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,44 +76,32 @@ fun SearchScreen(
     var selectedDate = datePickerState.selectedDateMillis?.let {
         convertMillisToDate(it)
     } ?: ""
-    LaunchedEffect(Unit) {
-        viewModel.loadSearchBase()
-    }
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(text = "Tìm kiếm chuyến bay") })
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        ) {
+            CustomTopBarSearchMain()
         }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            if (state.status is LoadStatus.Loading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            else if (state.status is LoadStatus.Error) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Error: ${state.status.description}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                mainViewModel.setError(state.status.description)
-                viewModel.reset()
-            }
-            else {
-                if (state.flights.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .absoluteOffset(y = (120.dp / 2))
+        ) {
+                if (state.status is LoadStatus.Loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else if (state.status is LoadStatus.Error) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -107,152 +109,215 @@ fun SearchScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No flights found",
-                            style = MaterialTheme.typography.bodyLarge
+                            text = "Error: ${state.status.description}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
+                    mainViewModel.setError(state.status.description)
+                    viewModel.reset()
                 } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5FA)),
-                            elevation = CardDefaults.cardElevation(8.dp)
+                    if (state.flights.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth()
+                            Text(
+                                text = "No flights found",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5FA)),
+                                elevation = CardDefaults.cardElevation(8.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.FlightTakeoff,
-                                        contentDescription = "Flight"
-                                    )
-                                    SelectDropdown(
-                                        label = "Điểm đi",
-                                        options = availableDestinations,
-                                        selectedOption = selectedDeparture,
-                                        onOptionSelected = { selectedDeparture = it }
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.FlightLand,
-                                        contentDescription = "Flight"
-                                    )
-                                    SelectDropdown(
-                                        label = "Điểm đến",
-                                        options = availableDestinations,
-                                        selectedOption = selectedArrive,
-                                        onOptionSelected = { selectedArrive = it }
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Box(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OutlinedTextField(
-                                        value = selectedDate,
-                                        onValueChange = { },
-                                        label = { Text("Ngày khởi hành") },
-                                        readOnly = true,
-                                        trailingIcon = {
-                                            IconButton(onClick = { showDatePicker = !showDatePicker }) {
-                                                Icon(
-                                                    imageVector = Icons.Default.DateRange,
-                                                    contentDescription = "Select date"
-                                                )
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(64.dp)
-                                    )
-
-                                    if (showDatePicker) {
-                                        DatePickerDialog(
-                                            state = datePickerState,
-                                            onDismissRequest = { showDatePicker = false },
-                                            onDateSelected = {
-                                                showDatePicker = false
-                                                selectedDate = convertMillisToDate(it)
-                                            }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.FlightTakeoff,
+                                            contentDescription = "Flight"
+                                        )
+                                        SelectDropdownCustom(
+                                            label = "Điểm đi",
+                                            options = availableDestinations,
+                                            selectedOption = selectedDeparture,
+                                            onOptionSelected = { selectedDeparture = it }
                                         )
                                     }
 
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .then(
+                                                Modifier.drawWithContent {
+                                                    drawContent()
+                                                    drawLine(
+                                                        color = Color(0xFFEBEBF0),
+                                                        strokeWidth = 1.dp.toPx(),
+                                                        start = Offset(0f, 0f),
+                                                        end = Offset(size.width, 0f)
+                                                    )
+                                                }
+                                            ).padding(top = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.FlightLand,
+                                            contentDescription = "Flight"
+                                        )
+                                        SelectDropdownCustom(
+                                            label = "Điểm đến",
+                                            options = availableDestinations,
+                                            selectedOption = selectedArrive,
+                                            onOptionSelected = { selectedArrive = it }
+                                        )
+                                    }
 
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text("Hạng ghế")
-                                    Icon(
-                                        imageVector = Icons.Filled.EventSeat,
-                                        contentDescription = "Flight"
-                                    )
-                                    SelectDropdown(
-                                        label = "Hạng ghế",
-                                        options = availableSeats,
-                                        selectedOption = selectedSeat,
-                                        onOptionSelected = { selectedSeat = it }
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .then(
+                                                Modifier.drawWithContent {
+                                                    drawContent()
+                                                    drawLine(
+                                                        color = Color(0xFFEBEBF0),
+                                                        strokeWidth = 1.dp.toPx(),
+                                                        start = Offset(0f, 0f),
+                                                        end = Offset(size.width, 0f)
+                                                    )
+                                                }
+                                            ).padding(top = 6.dp),
+                                    ) {
+                                        OutlinedTextField(
+                                            value = selectedDate,
+                                            onValueChange = { },
+                                            label = { Text("Ngày khởi hành") },
+                                            readOnly = true,
+                                            trailingIcon = {
+                                                IconButton(onClick = {
+                                                    showDatePicker = !showDatePicker
+                                                }) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.DateRange,
+                                                        contentDescription = "Select date"
+                                                    )
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(64.dp),
+                                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                                focusedBorderColor = Color.Transparent,
+                                                unfocusedBorderColor = Color.Transparent,
+                                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        )
+                                        if (showDatePicker) {
+                                            DatePickerDialog(
+                                                state = datePickerState,
+                                                onDismissRequest = { showDatePicker = false },
+                                                onDateSelected = {
+                                                    showDatePicker = false
+                                                    selectedDate = convertMillisToDate(it)
+                                                }
+                                            )
+                                        }
 
-                                ElevatedButton(
-                                    onClick = {
-                                        val flightRequest = FlightRequest(1L,2L,"07-01-2024","Business")
-                                        navController.navigate("${Screen.SearchList.route}?departureAirport=${flightRequest.departureAirport}&arrivalAirport=${flightRequest.arrivalAirport}&departureTime=${flightRequest.departureTime}&seatClass=${flightRequest.seatClass}&nameDeparture=${nameDeparture}&nameArrive=${nameArrive}")
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("Tìm chuyến bay")
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .then(
+                                                Modifier.drawWithContent {
+                                                    drawContent()
+                                                    drawLine(
+                                                        color = Color(0xFFEBEBF0),
+                                                        strokeWidth = 1.dp.toPx(),
+                                                        start = Offset(0f, 0f),
+                                                        end = Offset(size.width, 0f)
+                                                    )
+                                                }
+                                            ).padding(top = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.EventSeat,
+                                            contentDescription = "Flight"
+                                        )
+                                        SelectDropdownCustom(
+                                            label = "Hạng ghế",
+                                            options = availableSeats,
+                                            selectedOption = selectedSeat,
+                                            onOptionSelected = { selectedSeat = it }
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    ElevatedButton(
+                                        onClick = {
+                                            val flightRequest =
+                                                FlightRequest(1L, 2L, "07-01-2024", "Business")
+                                            navController.navigate("${Screen.SearchList.route}?departureAirport=${flightRequest.departureAirport}&arrivalAirport=${flightRequest.arrivalAirport}&departureTime=${flightRequest.departureTime}&seatClass=${flightRequest.seatClass}&nameDeparture=${nameDeparture}&nameArrive=${nameArrive}")
+                                        },
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("Tìm chuyến bay")
+                                    }
                                 }
                             }
-                    }
-                }
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        item {
+                        }
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()
+                        ) {
                             Text(
-                                text = "Đề xuất cho bạn",
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                                "Tra cứu gần đây",
+                                style = TextStyle(
+                                    color = Color(0xFF27272A),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    lineHeight = 24.sp,
+                                    textAlign = TextAlign.Start,
+                                ))
                         }
-                        items(state.flights) { flight ->
-                            FlightCard(flight)
+                        LazyRow(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(6) {
+                                HistorySearch()
+                            }
                         }
-                    }
 
+                    }
                 }
             }
         }
     }
-}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialog(
@@ -260,8 +325,6 @@ fun DatePickerDialog(
     onDismissRequest: () -> Unit,
     onDateSelected: (Long) -> Unit
 ) {
-    val currentDateMillis = System.currentTimeMillis()
-
     Dialog(onDismissRequest = onDismissRequest) {
         Box(
             modifier = Modifier
@@ -295,6 +358,61 @@ fun convertMillisToDate(millis: Long?): String {
         formatter.format(Date(it))
     } ?: ""
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SelectDropdownCustom(
+    label: String,
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+        OutlinedTextField(
+            value = selectedOption,
+            onValueChange = { },
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown"
+                )
+            },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+            ),
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -342,50 +460,60 @@ fun SelectDropdown(
         }
     }
 }
+@Composable
+fun CustomTopBarSearchMain() {
+    Image(
+        painter = painterResource(id = R.drawable.search),
+        contentDescription = "Airline logo",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize()
+    )
+}
+
+
 
 @Composable
-fun FlightCard(flight: FlightResponse) {
+fun HistorySearch() {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5FA)),
+        modifier = Modifier
+            .width(273.dp)
+            .padding(4.dp)
+            .background(Color(0xFFFFFF)),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
-                    Text("07:45", fontWeight = FontWeight.Bold)
-                    Text("${flight.codeDepartAirport}")
+                    Text(
+                        text = "HAN-SGN",
+                        style = TextStyle(
+                            color = Color(0xFF1A94FF),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight(500),
+                            lineHeight = 21.sp,
+                            textAlign = TextAlign.Start,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
                 }
 
-                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("1g 15p")
-                    Text("Bay thẳng", textAlign = TextAlign.Center)
-                }
-
-                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                    Text("09:00")
-                    Text("${flight.codeArriAirport}")
-                }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(top =  8.dp),horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
                     Text(
-                        flight.airline,
-                        style = MaterialTheme.typography.bodyMedium
+                        "Ngày: 03/11/2021",
+                        style = TextStyle(
+                            color = Color(0xFF808089),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight(400),
+                            lineHeight = 18.sp,
+                            textAlign = TextAlign.Start,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 }
 
-                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "${flight.busPrice} đ",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Blue
-                    )
-                }
             }
 
         }

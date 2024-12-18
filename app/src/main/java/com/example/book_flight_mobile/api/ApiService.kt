@@ -8,6 +8,7 @@ import com.example.book_flight_mobile.models.UserResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ApiService {
     @GET( "flights")
@@ -25,4 +26,6 @@ interface ApiService {
     @POST("/api/flight/search")
     suspend fun searchFlight(@Body flightRequest: FlightRequest): List<FlightResponse>
 
+    @GET("api/flight/{id}")
+    suspend fun getFlightById(@Path("id") id: Long): FlightResponse
 }

@@ -33,6 +33,7 @@ import com.example.book_flight_mobile.ui.screens.search.SearchModelView
 import com.example.book_flight_mobile.ui.screens.search.SearchScreen
 import com.example.book_flight_mobile.ui.screens.search.listsearch.SearchListScreen
 import com.example.book_flight_mobile.ui.screens.ticket.detail.DetailTicketScreen
+import com.example.book_flight_mobile.ui.screens.ticket.detail.SummaryTicketScreen
 
 
 sealed class Screen(val route:String){
@@ -40,6 +41,7 @@ sealed class Screen(val route:String){
     object Login:Screen("login")
     object TicketHistoryDetail:Screen("ticket_history_detail")
     object Detail:Screen("detail")
+    object SummaryTicket:Screen("summary")
     object Search:Screen("search")
     object HistoryTicket:Screen("booking_history")
     object Profile:Screen("profile")
@@ -164,6 +166,25 @@ fun Navigation() {
                 val ticketId = backStackEntry.arguments?.getLong("id") ?: -1
                 if (ticketId != -1L) {
                     DetailTicketScreen(
+                        navController = navController,
+                        viewModel = hiltViewModel(),
+                        mainViewModel = mainViewModel,
+                        id = ticketId
+                    )
+                }
+            }
+            composable(
+                Screen.SummaryTicket.route + "?id={id}",
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.LongType
+                        defaultValue = -1
+                    }
+                )
+            ) { backStackEntry ->
+                val ticketId = backStackEntry.arguments?.getLong("id") ?: -1
+                if (ticketId != -1L) {
+                    SummaryTicketScreen(
                         navController = navController,
                         viewModel = hiltViewModel(),
                         mainViewModel = mainViewModel,
