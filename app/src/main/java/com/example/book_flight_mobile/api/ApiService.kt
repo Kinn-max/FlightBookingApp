@@ -35,4 +35,7 @@ interface ApiService {
 
     @POST("/api/user/register")
     suspend fun register(userRegister: UserRegister)
+
+    @GET("api/ticket/{id}")
+    suspend fun  getTicketById(@Path("id") id: Long):TicketBookedInfo
 }

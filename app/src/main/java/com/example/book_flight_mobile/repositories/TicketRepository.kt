@@ -4,4 +4,5 @@ import com.example.book_flight_mobile.models.TicketBookedInfo
 
 interface TicketRepository {
     suspend fun loadTicketInfoList(): List<TicketBookedInfo>
+    suspend fun  getTicketById(id:Long):TicketBookedInfo
 }

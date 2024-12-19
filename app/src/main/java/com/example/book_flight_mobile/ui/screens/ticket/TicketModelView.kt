@@ -56,6 +56,24 @@ class TicketModelView @Inject constructor(
             }
         }
     }
+    fun getTicketById(id:Long) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
+            try {
+                val ticket = ticketRepository?.getTicketById(id)
+                if (ticket != null) {
+                    _uiState.value = _uiState.value.copy(ticket = ticket, status = LoadStatus.Success())
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        status = LoadStatus.Error("Ticket error")
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value =
+                    _uiState.value.copy(status = LoadStatus.Error(e.message ?: "Unknown error"))
+            }
+        }
+    }
     fun getUser() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())

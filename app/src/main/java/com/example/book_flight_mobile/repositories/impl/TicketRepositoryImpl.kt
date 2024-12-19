@@ -52,4 +52,20 @@ class TicketRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getTicketById(id: Long): TicketBookedInfo {
+        delay(1000)
+        return TicketBookedInfo(
+                ticketId = 1L,
+                price = 150.0,
+                seatNumber = "12A",
+                flightCode = "VN123",
+                arrivalTime = Date(2024, 12, 6, 10, 30),
+                departureTime = Date(2024, 12, 6, 8, 0),
+                arrivalAirportName = "Hà nội",
+                departureAirportName = "Hồ Chí Minh",
+                airlineName = "Vietnam Airlines",
+                luggage = 20.0
+        )
+    }
+
 }
