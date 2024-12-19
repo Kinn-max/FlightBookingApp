@@ -73,7 +73,11 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.CircularProgressIndicator
 import com.example.book_flight_mobile.Screen
+import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.ui.screens.utils.CardLoading
+import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -96,6 +100,7 @@ fun SearchListScreen(
     )
     var flightResponse by remember { mutableStateOf<FlightResponse?>(null) }
     val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         viewModel.searchRequest(flightRequest)
     }
@@ -123,10 +128,9 @@ fun SearchListScreen(
                     ecoPrice = 0.0,
                     busPrice = 0.0
                 ),
-                navController= navController
+                navController = navController
             )
-        }
-        ,
+        },
         sheetBackgroundColor = Color.White,
         modifier = Modifier.fillMaxSize()
     ) {
@@ -136,20 +140,27 @@ fun SearchListScreen(
             }
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                LazyRow(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                        .background(Color(0xFFFFFF)),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(6) {
-                        ListDay()
+                Row(
+                    modifier = Modifier.
+                    fillMaxWidth().background(Color.White),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    LazyRow(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(6) {
+                            ListDay()
+                        }
                     }
                 }
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -163,20 +174,65 @@ fun SearchListScreen(
                         )
                     )
                 }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.flightSearch) { flight ->
-                        FlightCardShow(flight, onFlightSelected = { selectedFlight ->
-                            flightResponse = selectedFlight
-                            scope.launch { sheetState.show() }
-                        })
+                when (uiState.status) {
+                    is LoadStatus.Loading -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(4) {
+                            CardLoading()
+                        }
                     }
                 }
+                    is LoadStatus.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = uiState.status.description,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    mainViewModel.setError(uiState.status.description)
+                    viewModel.reset()
+                }
+                    is LoadStatus.Success -> {
+                        if (uiState.flightSearch.isEmpty()) {
+                            EmptyFlight()
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(uiState.flightSearch) { flight ->
+                                    FlightCardShow(flight, onFlightSelected = { selectedFlight ->
+                                        flightResponse = selectedFlight
+                                        scope.launch { sheetState.show() }
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    else -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Đang tải dữ liệu...",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                 }
             }
         }
     }
@@ -318,11 +374,11 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 Text(
                                     "Thuế",
                                     style = TextStyle(
-                                        color = Color(0xFF27272A),
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 16.sp,
-                                        lineHeight = 18.sp
-                                    )
+                                        fontWeight = FontWeight.W400,
+                                        fontSize = 14.sp,
+                                        lineHeight = 21.sp,
+                                        color = Color(0xFF27272A)
+                                    ),
                                 )
                             }
                             Column(
@@ -359,11 +415,11 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 Text(
                                     "Hành lý",
                                     style = TextStyle(
-                                        color = Color(0xFF27272A),
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 16.sp,
-                                        lineHeight = 18.sp
-                                    )
+                                        fontWeight = FontWeight.W400,
+                                        fontSize = 14.sp,
+                                        lineHeight = 21.sp,
+                                        color = Color(0xFF27272A)
+                                    ),
                                 )
                             }
                             Column(
@@ -373,11 +429,11 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 Text(
                                     text = "0 đ",
                                     style = TextStyle(
-                                        color = Color(0xFF27272A),
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 16.sp,
-                                        lineHeight = 18.sp
-                                    )
+                                        fontWeight = FontWeight.W400,
+                                        fontSize = 14.sp,
+                                        lineHeight = 21.sp,
+                                        color = Color(0xFF27272A)
+                                    ),
                                 )
                             }
                         }
@@ -400,11 +456,11 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 Text(
                                     "Giảm giá",
                                     style = TextStyle(
-                                        color = Color(0xFF27272A),
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 16.sp,
-                                        lineHeight = 18.sp
-                                    )
+                                        fontWeight = FontWeight.W400,
+                                        fontSize = 14.sp,
+                                        lineHeight = 21.sp,
+                                        color = Color(0xFF27272A)
+                                    ),
                                 )
                             }
                             Column(
@@ -441,7 +497,7 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                 text = "Chọn",
                 color = Color.White,
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = Modifier.fillMaxSize(),
@@ -455,9 +511,13 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
 @Composable
 fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(
+                0xFFF5F5FA
+            )
+        ),
+        elevation = CardDefaults.cardElevation(4.dp),
         onClick = {
             onFlightSelected(flight)
         }
@@ -610,7 +670,9 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = {  }) {
+                IconButton(onClick = {
+                    onFlightSelected(flight)
+                }) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Back",
@@ -813,7 +875,6 @@ fun ListDay() {
         modifier = Modifier
             .fillMaxWidth()
             .height(55.dp)
-            .fillMaxSize()
             .then(
                 Modifier.drawWithContent {
                     drawContent()
@@ -826,9 +887,11 @@ fun ListDay() {
                 }
             )
             .padding(end = 8.dp)
-    ) {
+    )
+    {
         Column(
             modifier = Modifier
+                .background(Color.White)
                 .padding(8.dp)
                 .clip(RoundedCornerShape(6.dp)),
             verticalArrangement = Arrangement.Center,
@@ -846,16 +909,11 @@ fun ListDay() {
             Text(
                 text = "01/02/2022",
                 color = Color(0xFF808089),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 14.sp,
-                    lineHeight = 21.sp,
-                    textAlign = TextAlign.Center
-                )
             )
         }
     }
-
 }
+
 
 @Composable
 fun CustomTopBarSearch(title: String, navController: NavHostController) {

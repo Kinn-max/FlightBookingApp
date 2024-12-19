@@ -2,6 +2,7 @@ package com.example.book_flight_mobile.ui.screens.ticket.detail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -175,12 +176,11 @@ fun FlightDetailSummary(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxHeight()
-            .padding(16.dp),
+            .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -190,10 +190,12 @@ fun FlightDetailSummary(
                 fontSize = 20.sp
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .padding(16.dp),
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -201,7 +203,7 @@ fun FlightDetailSummary(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5FA)),
-                    elevation = CardDefaults.cardElevation(8.dp)
+                    elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Column(
                         modifier = Modifier
@@ -342,6 +344,7 @@ fun FlightDetailSummary(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFFFFFFF))
+                .padding(start = 16.dp, end = 16.dp)
         ){
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -385,27 +388,27 @@ fun FlightDetailSummary(
                     }
                 }
             }
-            Button(
-                onClick = {
-                    // Handle button click action here
-                },
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(8.dp)
-                    .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp)),
-                contentPadding = PaddingValues(8.dp)
-            )
-            {
+                    .height(50.dp)
+                    .padding(4.dp)
+                    .clickable {
+//                            xy ly
+                    }
+                    .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp))
+                    .padding(12.dp)
+            ) {
                 Text(
-                text = "Thanh toán",
-                color = Color.White,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                textAlign = TextAlign.Center
-            )
+                    text = "Thanh toán",
+                    color = Color.White,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                    textAlign = TextAlign.Center
+                )
             }
         }
 

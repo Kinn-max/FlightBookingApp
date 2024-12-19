@@ -14,14 +14,14 @@ class UserRepositoryImpl @Inject constructor(
     @SuppressLint("NewApi")
     override suspend fun loadUserInfo(): UserResponse? {
 
-        return null;
-//        return UserResponse(
-//            id = 1L,
-//            fullName = "Nguyen Van A",
-//            phoneNumber = "0123456789",
-//            address = "123 Le Loi, Hanoi, Vietnam",
-//            dateOfBirth = LocalDate.of(1990, 5, 20)
-//        )
+
+        return UserResponse(
+            id = 1L,
+            fullName = "Nguyen Van A",
+            phoneNumber = "0123456789",
+            address = "123 Le Loi, Hanoi, Vietnam",
+            dateOfBirth = LocalDate.of(1990, 5, 20)
+        )
     }
 
     override suspend fun login(username: String, password: String) {

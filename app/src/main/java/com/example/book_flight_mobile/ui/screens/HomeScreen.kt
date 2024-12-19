@@ -59,7 +59,12 @@ import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
+import com.example.book_flight_mobile.Screen
+import com.example.book_flight_mobile.ui.screens.utils.CardLoading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +78,7 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            CustomTopBar()
+            CustomTopBar(navController)
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues) .background(Color(0xFFF5F5FA))) {
@@ -123,16 +128,17 @@ fun HomeScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding( start = 16.dp)
                     )
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(uiState.flight) { flight ->
-                            FlightCard(flight)
-                        }
-                    }
+                    CardLoading()
+//                    LazyColumn(
+//                        modifier = Modifier
+//                            .padding(16.dp)
+//                            .fillMaxSize(),
+//                        verticalArrangement = Arrangement.spacedBy(8.dp)
+//                    ) {
+//                        items(uiState.flight) { flight ->
+//                            FlightCard(flight)
+//                        }
+//                    }
                 }
             }
         }
@@ -251,7 +257,7 @@ fun FlightCard(flight: FlightResponse) {
 }
 
 @Composable
-fun CustomTopBar() {
+fun CustomTopBar(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,22 +272,47 @@ fun CustomTopBar() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "app logo",
-                contentScale = ContentScale.Crop,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "app logo",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(width = 100.dp, height = 56.dp)
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
                 modifier = Modifier
-                    .size(width = 100.dp, height = 56.dp)
-            )
-            Image(
-                painter = painterResource(id = R.drawable.user),
-                contentDescription = "User avatar",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(35.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.Gray, CircleShape)
-            )
+                    .clickable {
+                        navController.navigate(Screen.Login.route)
+                    }
+            ){
+                Box(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                ){
+                    Text("Đăng nhập",
+                            style = TextStyle(
+                            fontWeight = FontWeight.W500,
+                            fontSize = 18.sp,
+                            lineHeight = 21.sp,
+                    ),)
+                }
+                Image(
+                    painter = painterResource(id = R.drawable.user),
+                    contentDescription = "User avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.Gray, CircleShape)
+                )
+            }
         }
     }
 }
