@@ -25,9 +25,7 @@ class SearchModelView @Inject constructor (
 ):ViewModel(){
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState = _uiState.asStateFlow()
-    init {
-        loadSearchBase()
-    }
+
     fun  reset(){
         _uiState.value = _uiState.value.copy(status = LoadStatus.Innit())
     }

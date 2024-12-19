@@ -41,16 +41,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.Popup
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.R
 import com.example.book_flight_mobile.Screen
-
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.FlightRequest
-import com.example.book_flight_mobile.models.FlightResponse
-import com.example.book_flight_mobile.ui.screens.BannerCard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -117,19 +113,6 @@ fun SearchScreen(
                     mainViewModel.setError(state.status.description)
                     viewModel.reset()
                 } else {
-                    if (state.flights.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No flights found",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                    } else {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -313,10 +296,10 @@ fun SearchScreen(
                         }
 
                     }
-                }
+
             }
         }
-    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

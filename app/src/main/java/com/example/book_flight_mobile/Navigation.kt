@@ -20,12 +20,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.ui.screens.HomeScreen
 import com.example.book_flight_mobile.ui.screens.HomeViewModel
+import com.example.book_flight_mobile.ui.screens.loginandregister.AuthModelView
+import com.example.book_flight_mobile.ui.screens.loginandregister.LoginScreen
+import com.example.book_flight_mobile.ui.screens.loginandregister.RegisterScreen
 import com.example.book_flight_mobile.ui.screens.profile.ProfileModelView
 import com.example.book_flight_mobile.ui.screens.profile.ProfileScreen
 import com.example.book_flight_mobile.ui.screens.ticket.HistoryTicketScreen
@@ -39,6 +41,7 @@ import com.example.book_flight_mobile.ui.screens.ticket.detail.SummaryTicketScre
 sealed class Screen(val route:String){
     object Home:Screen("home")
     object Login:Screen("login")
+    object Register:Screen("register")
     object TicketHistoryDetail:Screen("ticket_history_detail")
     object Detail:Screen("detail")
     object SummaryTicket:Screen("summary")
@@ -172,6 +175,22 @@ fun Navigation() {
                         id = ticketId
                     )
                 }
+            }
+            composable(Screen.Login.route) {
+                val loginModelView: AuthModelView = hiltViewModel()
+                LoginScreen(
+                    navController = navController,
+                    viewModel = loginModelView,
+                    mainViewModel = mainViewModel
+                )
+            }
+            composable(Screen.Register.route) {
+                val loginModelView: AuthModelView = hiltViewModel()
+                RegisterScreen(
+                    navController = navController,
+                    viewModel = loginModelView,
+                    mainViewModel = mainViewModel
+                )
             }
             composable(
                 Screen.SummaryTicket.route + "?id={id}",

@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.ui.screens.search.CustomTopBarSearchMain
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,49 +52,29 @@ fun ProfileScreen(
     LaunchedEffect(Unit) {
         viewModel.personalInformation()
     }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "Thông tin cá nhân")
-                        Text(
-                            text = "Lịch sử đặt vé",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 16.sp,
-                                color = Color.Blue,
-                                textDecoration = TextDecoration.Underline
-                            ),
-                            modifier = Modifier
-                                .padding(end = 16.dp)
-                                .clickable {
-                                    navController.navigate(Screen.HistoryTicket.route)
-                                }
-                        )
 
-                    }
-                }
-            )
-        }
-    )
- { padding ->
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(top = 0.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+                .padding(top = 20.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
         ) {
             when (state.status) {
                 is LoadStatus.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator()
                     }
                 }
                 is LoadStatus.Error -> {
-                    Box(modifier = Modifier.fillMaxWidth().padding(padding), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
                             text = state.status.description,
                             color = MaterialTheme.colorScheme.error,
@@ -103,29 +84,95 @@ fun ProfileScreen(
                     mainViewModel.setError(state.status.description)
                     viewModel.reset()
                 }
+
                 else -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                            .padding(16.dp)
-                    ) {
-                        Column {
-                            Text("Name: ${state.info?.fullName ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Date of Birth: ${state.info?.dateOfBirth ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Address: ${state.info?.address ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+                    if(state.info == null){
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                                Text(
+                                    "Bạn phải đăng nhập trước !!!",
+                                )
                         }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                            ElevatedButton(onClick = {  }, modifier = Modifier.padding(16.dp)) {
-                                Text("Đăng xuất")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                ElevatedButton(onClick = {
+                                    navController.navigate(Screen.Login.route)
+                                }, modifier = Modifier.padding(16.dp)) {
+                                    Text("Đăng nhập")
+                                }
+                            }
+                        }
+                    }else{
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = "Thông tin cá nhân")
+                                Text(
+                                    text = "Lịch sử đặt vé",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 16.sp,
+                                        color = Color.Blue,
+                                        textDecoration = TextDecoration.Underline
+                                    ),
+                                    modifier = Modifier
+                                        .padding(end = 16.dp)
+                                        .clickable {
+                                            navController.navigate(Screen.HistoryTicket.route)
+                                        }
+                                )
+
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .padding(16.dp)
+                        ) {
+                            Column {
+                                Text(
+                                    "Name: ${state.info?.fullName ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Date of Birth: ${state.info?.dateOfBirth ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Address: ${state.info?.address ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                ElevatedButton(onClick = { }, modifier = Modifier.padding(16.dp)) {
+                                    Text("Đăng xuất")
+                                }
                             }
                         }
                     }

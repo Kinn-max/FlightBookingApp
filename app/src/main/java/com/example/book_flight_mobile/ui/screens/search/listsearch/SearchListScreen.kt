@@ -426,16 +426,16 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                 }
             }
         }
-        Button(
-            onClick = {
-                navController.navigate("${Screen.SummaryTicket.route}?id=${flightResponse.id}")
-            },
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
-                .padding(8.dp)
-                .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp)),
-            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
+                .height(50.dp)
+                .padding(4.dp)
+                .clickable {
+                    navController.navigate("${Screen.SummaryTicket.route}?id=${flightResponse.id}")
+                }
+                .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp))
+                .padding(12.dp)
         ) {
             Text(
                 text = "Chọn",
@@ -444,7 +444,7 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
                 textAlign = TextAlign.Center
             )
         }
