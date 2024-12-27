@@ -8,11 +8,12 @@ import com.example.book_flight_mobile.models.UserRegister
 import com.example.book_flight_mobile.models.UserResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ApiService {
-    @GET( "flights")
+    @GET( "api/flight/by-user")
     suspend fun loadFlights(): List<FlightResponse>
 
     @GET("api/airport")
@@ -24,10 +25,11 @@ interface ApiService {
     @GET("api/user")
     suspend fun loadUserInfo(): UserResponse
 
-    @POST("/api/flight/search")
+    @Headers("Content-Type: application/json")
+    @POST("api/flight/search")
     suspend fun searchFlight(@Body flightRequest: FlightRequest): List<FlightResponse>
 
-    @GET("api/flight/{id}")
+    @GET("api/flight/detail/{id}")
     suspend fun getFlightById(@Path("id") id: Long): FlightResponse
 
     @POST("/api/user/login")

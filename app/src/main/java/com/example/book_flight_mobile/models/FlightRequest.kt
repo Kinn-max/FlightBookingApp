@@ -4,9 +4,7 @@ package com.example.book_flight_mobile.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import javax.validation.constraints.NotNull
 
-
 data class FlightRequest(
-
     @field:NotNull
     @field:JsonProperty("departure_airport")
     val departureAirport: Long,
@@ -23,3 +21,4 @@ data class FlightRequest(
     @field:JsonProperty("seat_class")
     val seatClass: String
 )
+

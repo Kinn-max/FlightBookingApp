@@ -1,23 +1,22 @@
 package com.example.book_flight_mobile.ui.screens.search.listsearch
 
-import androidx.compose.foundation.BorderStroke
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -26,10 +25,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -39,7 +41,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,8 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -63,26 +63,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import com.example.book_flight_mobile.MainViewModel
-import com.example.book_flight_mobile.R
-import com.example.book_flight_mobile.models.FlightRequest
-import com.example.book_flight_mobile.models.FlightResponse
-import com.example.book_flight_mobile.ui.screens.search.SearchModelView
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.CircularProgressIndicator
 import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.models.FlightRequest
+import com.example.book_flight_mobile.models.FlightResponse
+import com.example.book_flight_mobile.models.PlaneResponse
+import com.example.book_flight_mobile.ui.screens.search.SearchModelView
 import com.example.book_flight_mobile.ui.screens.utils.CardLoading
 import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
+import com.example.book_flight_mobile.ui.screens.utils.base64ToBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.util.Locale
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchListScreen(
@@ -93,16 +94,25 @@ fun SearchListScreen(
     departure: String,
     arrive: String
 ) {
+    var flightTmp = FlightRequest(
+        departureAirport = 3L,
+        arrivalAirport = 1L,
+        departureTime = "30-12-2024",
+        seatClass = "Business Class"
+    )
     val uiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
+    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val currentDate = LocalDate.parse(flightTmp.departureTime, dateFormatter)
+    val daysList = (0 until 7).map { currentDate.plusDays(it.toLong()) }
     var flightResponse by remember { mutableStateOf<FlightResponse?>(null) }
     val scope = rememberCoroutineScope()
-
+    var selectedDate by remember { mutableStateOf(daysList.first()) }
     LaunchedEffect(Unit) {
-        viewModel.searchRequest(flightRequest)
+        viewModel.searchRequest(flightTmp)
     }
 
     ModalBottomSheetLayout(
@@ -125,8 +135,12 @@ fun SearchListScreen(
                     codeArriAirport = "",
                     airline = "",
                     logoAirline = "",
+                    plane = PlaneResponse(id = 0L,0,0,"",""),
                     ecoPrice = 0.0,
-                    busPrice = 0.0
+                    busPrice = 0.0,
+                    status = true,
+                    ticketId = 0L,
+                    seats = emptyList()
                 ),
                 navController = navController
             )
@@ -141,8 +155,9 @@ fun SearchListScreen(
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
                 Row(
-                    modifier = Modifier.
-                    fillMaxWidth().background(Color.White),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ){
@@ -152,8 +167,13 @@ fun SearchListScreen(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(6) {
-                            ListDay()
+                        items(daysList) { day ->
+                            ListDay(
+                                date = day,
+                                dateFormatter = dateFormatter,
+                                isSelected = selectedDate == day,
+                                onClick = { selectedDate = it }
+                            )
                         }
                     }
                 }
@@ -208,7 +228,7 @@ fun SearchListScreen(
                         } else {
                             LazyColumn(
                                 modifier = Modifier
-                                    .padding(16.dp)
+                                    .padding(start = 16.dp, end = 16.dp, top = 16.dp)
                                     .fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
@@ -243,6 +263,7 @@ fun SearchListScreen(
 fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState, flightResponse: FlightResponse,navController: NavHostController) {
     Column(
         modifier = Modifier
+            .background(Color(0xFFF5F5FA))
             .fillMaxHeight(0.6f)
             .padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween
@@ -303,8 +324,10 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.End
                             ) {
+                                val formattedEcoPrice =
+                                    NumberFormat.getNumberInstance(Locale("vi", "VN")).format(flightResponse.ecoPrice)
                                 Text(
-                                    text = "${flightResponse.ecoPrice}",
+                                    text = "${formattedEcoPrice} đ",
                                     style = TextStyle(
                                         fontWeight = FontWeight.W400,
                                         fontSize = 14.sp,
@@ -330,6 +353,7 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.Start
                             ) {
+
                                 Text(
                                     "Ghế thương gia",
                                     style = TextStyle(
@@ -344,8 +368,10 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.End
                             ) {
+                                val formattedBusPrice =
+                                    NumberFormat.getNumberInstance(Locale("vi", "VN")).format(flightResponse.busPrice)
                                 Text(
-                                    text = "${flightResponse.ecoPrice}",
+                                    text = "${formattedBusPrice} đ",
                                     style = TextStyle(
                                         fontWeight = FontWeight.W400,
                                         fontSize = 14.sp,
@@ -511,30 +537,33 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
 @Composable
 fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(
-                0xFFF5F5FA
-            )
-        ),
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         onClick = {
             onFlightSelected(flight)
         }
     )  {
-        Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
+        Column(modifier = Modifier
+            .background(Color.White)
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
-                    Text("07:45",
+                    val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    val formattedTime = dateFormat.format(flight.departureTime)
+                    Text(
+                        text = formattedTime,
                         color = Color(0xFF27272A),
                         style = TextStyle(
                             fontWeight = FontWeight.W700,
                             fontSize = 18.sp,
                             lineHeight = 21.sp
-                        ))
+                        )
+                    )
                     Text(flight.codeDepartAirport ,
                         color = Color(0xFF27272A),
                         style = TextStyle(
@@ -544,10 +573,12 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
                         )
                     )
                 }
-
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    val durationMillis = flight.arrivalTime.time - flight.departureTime.time
+                    val hours = (durationMillis / (1000 * 60 * 60)).toInt()
+                    val minutes = (durationMillis / (1000 * 60) % 60).toInt()
                     Text(
-                        "1g 15p",
+                        text = "${hours}g ${minutes}p",
                         color = Color(0xFF808089),
                         style = TextStyle(
                             fontWeight = FontWeight.W400,
@@ -558,23 +589,25 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        ,
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Divider(
                             modifier = Modifier
-                                .width(53.dp)
+                                .weight(0.6f)
                                 .height(2.dp)
-                                .background(Color.Black)
+                                .background(Color(0xFF515158))
                         )
                         Icon(
-                            imageVector = Icons.Default.ArrowForward,
+                            imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Arrow",
                             modifier = Modifier
                                 .size(12.dp)
-                                .padding(start = 0.dp)
+                                .padding(start = (0).dp)
                                 .align(Alignment.CenterVertically)
+                                .offset(x = (-6).dp)
+                            ,tint = Color(0xFF515158)
                         )
                     }
 
@@ -591,7 +624,10 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
 
 
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                    Text("09:00",
+                    val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    val formattedTime = dateFormat.format(flight.arrivalTime)
+                    Text(
+                        formattedTime,
                         color = Color(0xFF27272A),
                         style = TextStyle(
                             fontWeight = FontWeight.W700,
@@ -617,7 +653,7 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
                     .padding(top = 8.dp)
                     .fillMaxWidth()
                     .then(
-                        Modifier.drawWithContent{
+                        Modifier.drawWithContent {
                             drawContent()
                             drawLine(
                                 color = Color(0xFFEBEBF0),
@@ -626,46 +662,78 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
                                 end = Offset(size.width, 0f)
                             )
                         }
-                    ).padding(top = 8.dp),
+                    )
+                    .height(60.dp),
             ) {
                 Column(modifier = Modifier.weight(2f), horizontalAlignment = Alignment.Start) {
-                    Row(modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,) {
-                        Image(
-                            painter = painterResource(id = R.drawable.vietjet),
-                            contentDescription = "Airline logo",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(end = 6.dp)
-                        )
-                        Text(
-                            flight.airline,
-                            style = TextStyle(
-                                color = Color(0xFF27272A),
-                                fontWeight = FontWeight.W500,
-                                fontSize = 14.sp,
-                                lineHeight = 18.sp
+                    Row(
+                        modifier = Modifier
+                        .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        val bitmap = base64ToBitmap(flight.logoAirline)
+                        val imageBitmap = bitmap?.asImageBitmap()
+                        if (imageBitmap != null) {
+                            Image(
+                                bitmap = imageBitmap,
+                                contentDescription = "Airline logo",
+                                modifier = Modifier
+                                    .size(height = 60.dp, width = 100.dp)
+
                             )
-                        )
+                        } else {
+                            Text(
+                                text = "No Image",
+                                color = Color.Gray,
+                                style = TextStyle(
+                                    fontWeight = FontWeight.W400,
+                                    fontSize = 14.sp
+                                )
+                            )
+                        }
+//                        Text(
+//                            flight.airline,
+//                            style = TextStyle(
+//                                color = Color(0xFF27272A),
+//                                fontWeight = FontWeight.W500,
+//                                fontSize = 14.sp,
+//                                lineHeight = 18.sp
+//                            ),
+//                            modifier = Modifier.align(Alignment.CenterVertically)
+//                        )
                     }
                 }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    val formattedEcoPrice =
+                        NumberFormat.getNumberInstance(Locale("vi", "VN")).format(flight.ecoPrice)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center){
+                            Text(
+                                text = "$formattedEcoPrice đ",
+                                style = TextStyle(
+                                    color = Color(0xFF1A94FF),
+                                    fontFamily = FontFamily.Default,
+                                    fontWeight = FontWeight.W700,
+                                    fontSize = 18.sp,
+                                    lineHeight = 21.sp
+                                ),
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                    }
 
-                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "${flight.busPrice} đ",
-                        style = TextStyle(
-                            color = Color(0xFF1A94FF),
-                            fontFamily = FontFamily.Default,
-                            fontWeight = FontWeight.W700,
-                            fontSize = 18.sp,
-                            lineHeight = 21.sp
-                        )
-                    )
                 }
             }
             Row(
                 modifier = Modifier
                     .padding(start = 0.dp)
+                    .height(30.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -688,13 +756,12 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
 fun FlightCardDetail(flight: FlightResponse) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFEBEBF0), shape = RoundedCornerShape(8.dp))
-            .border(BorderStroke(1.dp, Color(0xFFEBEBF0))),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+            .fillMaxWidth(),
+    ){
+        Column(modifier = Modifier
+            .background(Color.White)
+            .padding(16.dp)
+        ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth(),
@@ -704,15 +771,30 @@ fun FlightCardDetail(flight: FlightResponse) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.vietjet),
-                            contentDescription = "Airline logo",
-                            modifier = Modifier
-                                .size(60.dp)
-                                .padding(end = 6.dp)
-                        )
+                        val bitmap = base64ToBitmap(flight.logoAirline)
+                        val imageBitmap = bitmap?.asImageBitmap()
+                        if (imageBitmap != null) {
+                            Image(
+                                bitmap = imageBitmap,
+                                contentDescription = "Airline logo",
+                                modifier = Modifier
+                                    .size(height = 70.dp, width = 100.dp)
+
+                            )
+                        } else {
+                            Text(
+                                text = "No Image",
+                                color = Color.Gray,
+                                style = TextStyle(
+                                    fontWeight = FontWeight.W400,
+                                    fontSize = 14.sp
+                                )
+                            )
+                        }
                         Column(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 20.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
@@ -725,7 +807,7 @@ fun FlightCardDetail(flight: FlightResponse) {
                                 )
                             )
                             Text(
-                                text = "VN-158",
+                                text = flight.plane.name,
                                 style = TextStyle(
                                     color = Color(0xFF808089),
                                     fontFamily = FontFamily.Default,
@@ -751,7 +833,8 @@ fun FlightCardDetail(flight: FlightResponse) {
                                         end = Offset(size.width, 0f)
                                     )
                                 }
-                            ).padding(top = 8.dp),
+                            )
+                            .padding(top = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
@@ -764,8 +847,10 @@ fun FlightCardDetail(flight: FlightResponse) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                            val formattedTime = dateFormat.format(flight.departureTime)
                             Text(
-                                "07:45",
+                                formattedTime,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -773,8 +858,10 @@ fun FlightCardDetail(flight: FlightResponse) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dayFormat = SimpleDateFormat("EE, dd-MM-yyyy", Locale("vi", "VN"))
+                            val formattedDay = dayFormat.format(flight.departureTime)
                             Text(
-                                "T7, 05/02/2022",
+                                formattedDay,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -788,8 +875,11 @@ fun FlightCardDetail(flight: FlightResponse) {
                             modifier = Modifier.weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            val durationMillis = flight.arrivalTime.time - flight.departureTime.time
+                            val hours = (durationMillis / (1000 * 60 * 60)).toInt()
+                            val minutes = (durationMillis / (1000 * 60) % 60).toInt()
                             Text(
-                                "1g 15p",
+                                text = "${hours}g ${minutes}p",
                                 color = Color(0xFF808089),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W400,
@@ -800,26 +890,27 @@ fun FlightCardDetail(flight: FlightResponse) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
+                                ,
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Divider(
                                     modifier = Modifier
-                                        .width(53.dp)
+                                        .weight(0.6f)
                                         .height(2.dp)
-                                        .background(Color.Black)
+                                        .background(Color(0xFF515158))
                                 )
                                 Icon(
-                                    imageVector = Icons.Default.ArrowForward,
+                                    imageVector = Icons.Default.KeyboardArrowRight,
                                     contentDescription = "Arrow",
                                     modifier = Modifier
                                         .size(12.dp)
-                                        .padding(start = 0.dp)
+                                        .padding(start = (0).dp)
                                         .align(Alignment.CenterVertically)
+                                        .offset(x = (-6).dp)
+                                    ,tint = Color(0xFF515158)
                                 )
                             }
-
                             Text(
                                 "Bay thẳng",
                                 color = Color(0xFF808089),
@@ -842,8 +933,10 @@ fun FlightCardDetail(flight: FlightResponse) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                            val formattedTime = dateFormat.format(flight.arrivalTime)
                             Text(
-                                "07:45",
+                                formattedTime,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -851,8 +944,10 @@ fun FlightCardDetail(flight: FlightResponse) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dayFormat = SimpleDateFormat("EE, dd-MM-yyyy", Locale("vi", "VN"))
+                            val formattedDay = dayFormat.format(flight.arrivalTime)
                             Text(
-                                "T7, 05/02/2022",
+                                formattedDay,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -869,12 +964,23 @@ fun FlightCardDetail(flight: FlightResponse) {
 
     }
     }
+
+val dayOfWeekInVietnamese = listOf(
+    "Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"
+)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ListDay() {
+fun ListDay(date: LocalDate, dateFormatter: DateTimeFormatter, isSelected: Boolean,
+            onClick: (LocalDate) -> Unit ) {
+    val dayOfWeek = date.dayOfWeek.value
+    val vietnameseDay = dayOfWeekInVietnamese[dayOfWeek % 7]
+    val cardBackgroundColor = if (isSelected) Color(0xFF1A94FF) else Color.White
+    val textColorBottom = if (isSelected) Color.White else Color(0xFF808089)
+    val textColorTop = if (isSelected) Color.White else Color(0xFF27272A)
     Card(
         modifier = Modifier
-            .fillMaxWidth()
             .height(55.dp)
+            .clickable { onClick(date) }
             .then(
                 Modifier.drawWithContent {
                     drawContent()
@@ -887,28 +993,32 @@ fun ListDay() {
                 }
             )
             .padding(end = 8.dp)
-    )
-    {
+    ) {
         Column(
             modifier = Modifier
-                .background(Color.White)
-                .padding(8.dp)
+                .background(cardBackgroundColor)
+                .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)
                 .clip(RoundedCornerShape(6.dp)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Thứ 2",
-                color = Color(0xFF27272A),
+                text = vietnameseDay,
+                color = textColorTop,
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     lineHeight = 27.sp
                 )
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "01/02/2022",
-                color = Color(0xFF808089),
+                text = date.format(dateFormatter),
+                color = textColorBottom,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
             )
         }
     }

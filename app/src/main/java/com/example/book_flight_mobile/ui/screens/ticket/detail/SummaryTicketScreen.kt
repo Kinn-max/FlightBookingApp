@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
@@ -73,6 +74,8 @@ import com.example.book_flight_mobile.ui.screens.search.convertMillisToDate
 import com.example.book_flight_mobile.ui.screens.search.listsearch.CustomTopBarSearch
 import com.example.book_flight_mobile.ui.screens.search.listsearch.FlightCardDetail
 import com.example.book_flight_mobile.ui.screens.ticket.TicketModelView
+import com.example.book_flight_mobile.ui.screens.utils.CardLoading
+import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
 import okhttp3.internal.userAgent
 
 
@@ -91,13 +94,13 @@ fun SummaryTicketScreen(
     val availableLuggage = listOf("10kg - 100.000VND", "20kg - 200.000VND")
     var selectedSeat by remember { mutableStateOf(availableSeats[0]) }
     var selectedLuggage by remember { mutableStateOf(availableLuggage[0]) }
-    val state = viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         topBar = {
             CustomTopBarSearch("Tóm tắt đặt chỗ", navController)
         }
     ) { padding ->
-        when (state.value.status) {
+        when (uiState.status) {
             is LoadStatus.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -106,45 +109,39 @@ fun SummaryTicketScreen(
                     CircularProgressIndicator()
                 }
             }
+            is LoadStatus.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = uiState.status.description,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                mainViewModel.setError(uiState.status.description)
+                viewModel.reset()
+            }
             is LoadStatus.Success -> {
-                if (state.value.flight != null) {
+                if (uiState.flight != null) {
                     Column(modifier = Modifier.padding(padding)) {
                         FlightDetailSummary(
-                            user = state.value.user!!,
-                            fromTo = "Hồ Chí Minh - Hà Nội",
-                            flightResponse = state.value.flight!!,
+                            user = uiState.user!!,
+                            fromTo = "${uiState.flight?.departureLocation} - ${uiState.flight?.arrivalLocation}",
+                            flightResponse = uiState.flight!!,
                             availableSeats = availableSeats,
                             availableLuggage = availableLuggage,
                             selectedSeat = selectedSeat,
                             selectedLuggage = selectedLuggage,
                             onSeatSelected = { selectedSeat = it },
-                            onLuggageSelected = { selectedLuggage = it
+                            onLuggageSelected = {
+                                selectedLuggage = it
                             }
                         )
                     }
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Không tìm thấy vé.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-            is LoadStatus.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Đã xảy ra lỗi, vui lòng thử lại sau.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
                 }
             }
             else -> {

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Card
@@ -152,10 +154,17 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
             navController.navigate(Screen.TicketHistoryDetail.route + "?id=${ticket.ticketId}")
         }
     )  {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     modifier = Modifier.weight(1f),
@@ -183,23 +192,24 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Divider(
                             modifier = Modifier
-                                .width(53.dp)
+                                .weight(0.5f)
                                 .height(2.dp)
-                                .background(Color.Black)
+                                .background(Color(0xFF515158))
                         )
                         Icon(
-                            imageVector = Icons.Default.ArrowForward,
+                            imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Arrow",
                             modifier = Modifier
-                                .size(16.dp)
-                                .padding(start = 4.dp),
-                            tint = Color.Black
+                                .size(12.dp)
+                                .padding(start = 0.dp)
+                                .align(Alignment.CenterVertically)
+                                .offset(x = (-6).dp),
+                            tint = Color(0xFF515158)
                         )
                     }
                 }
@@ -233,7 +243,7 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                     .padding(top = 20.dp)
                     .fillMaxWidth()
                     .then(
-                        Modifier.drawWithContent{
+                        Modifier.drawWithContent {
                             drawContent()
                             drawLine(
                                 color = Color(0xFFEBEBF0),
@@ -242,7 +252,8 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                                 end = Offset(size.width, 0f)
                             )
                         }
-                    ).padding(top = 10.dp),
+                    )
+                    .padding(top = 10.dp),
             ) {
                 Column(
                     modifier = Modifier.weight(1f),
@@ -250,9 +261,8 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ){
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text(
                             "Mã chuyến bay: ",
                             style = TextStyle(
@@ -287,10 +297,10 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                             lineHeight = 21.sp
                         )
                     )
-
                 }
             }
         }
+
     }
 }
 

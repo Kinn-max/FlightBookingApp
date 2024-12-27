@@ -72,6 +72,9 @@ fun SearchScreen(
     var selectedDate = datePickerState.selectedDateMillis?.let {
         convertMillisToDate(it)
     } ?: ""
+    LaunchedEffect(Unit) {
+        viewModel.getAllAirports()
+    }
     Box(
         modifier = Modifier.fillMaxSize()
     ) {

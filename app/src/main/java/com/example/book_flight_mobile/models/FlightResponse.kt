@@ -15,6 +15,11 @@ data class FlightResponse(
     val codeArriAirport: String,
     val airline: String,
     val logoAirline: String,
+    val plane: PlaneResponse,
     val ecoPrice: Double,
-    val busPrice: Double
+    val busPrice: Double,
+    val status: Boolean,
+    val ticketId: Long,
+    val seats: List<SeatResponse>
 )
+
