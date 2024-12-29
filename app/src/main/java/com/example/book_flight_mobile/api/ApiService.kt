@@ -1,9 +1,11 @@
 package com.example.book_flight_mobile.api
 
 import com.example.book_flight_mobile.models.AirportResponse
+import com.example.book_flight_mobile.models.AuthResponse
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.models.TicketBookedInfo
+import com.example.book_flight_mobile.models.UserLogin
 import com.example.book_flight_mobile.models.UserRegister
 import com.example.book_flight_mobile.models.UserResponse
 import retrofit2.http.Body
@@ -32,8 +34,8 @@ interface ApiService {
     @GET("api/flight/detail/{id}")
     suspend fun getFlightById(@Path("id") id: Long): FlightResponse
 
-    @POST("/api/user/login")
-    suspend fun login(username:String, password:String)
+    @POST("api/auth/login")
+    suspend fun login(@Body userLogin: UserLogin): AuthResponse
 
     @POST("/api/user/register")
     suspend fun register(userRegister: UserRegister)

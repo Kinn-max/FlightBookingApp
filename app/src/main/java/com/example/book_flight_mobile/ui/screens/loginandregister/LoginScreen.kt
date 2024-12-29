@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,6 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.Screen
+import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.config.TokenManager
+
 
 @Composable
 fun LoginScreen(
@@ -44,8 +48,7 @@ fun LoginScreen(
     viewModel: AuthModelView,
     mainViewModel: MainViewModel,
 ) {
-    var userName by remember { mutableStateOf("") }
-    var passWord by remember { mutableStateOf("") }
+    val tokenManager: TokenManager
     val state = viewModel.uiState.collectAsState()
     Scaffold (
         topBar = {
@@ -53,101 +56,118 @@ fun LoginScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-
-            Card(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(15.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5FA)),
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        OutlinedTextField(
-                            value = userName,
-                            onValueChange =  { newText ->
-                                userName = newText
-                            },
-                            label = { Text("Tên đăng nhập") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp)
-                        )
-
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        OutlinedTextField(
-                            value = passWord,
-                            onValueChange = { newText ->
-                                passWord = newText
-                            },
-                            label = { Text("Mật khẩu") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp),
-                            visualTransformation = PasswordVisualTransformation()
-                        )
-
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
+            when (state.value.status) {
+                is LoadStatus.Loading -> {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .padding(4.dp)
-                            .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp))
-                            .padding(12.dp)
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Login",
-                            color = Color.White,
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            modifier = Modifier.fillMaxSize(),
-                            textAlign = TextAlign.Center
-                        )
+                        CircularProgressIndicator()
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                }
+
+                is LoadStatus.Error -> {
+                    mainViewModel.setError(state.value.status.description)
+                    viewModel.reset()
+                }
+
+                else -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(15.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5FA)),
+                        elevation = CardDefaults.cardElevation(8.dp)
                     ) {
-                        Text(
-                            text = "Bạn chưa có tài khoản?",
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                        Text(
-                            text = "Đăng kí",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 16.sp,
-                                color = Color.Blue,
-                                textDecoration = TextDecoration.Underline
-                            ),
-                            modifier = Modifier.clickable {
-                                navController.navigate(Screen.Register.route)
+                        Column(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                OutlinedTextField(
+                                    value = state.value.username,
+                                    onValueChange = {
+                                        viewModel.updateUsername(it)
+                                    },
+                                    label = { Text("Tên đăng nhập") },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp)
+                                )
+
                             }
-                        )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                OutlinedTextField(
+                                    value = state.value.password,
+                                    onValueChange = {
+                                        viewModel.updatePassword(it)
+                                    },
+                                    label = { Text("Mật khẩu") },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp),
+                                    visualTransformation = PasswordVisualTransformation()
+                                )
+
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                                    .padding(4.dp)
+                                    .clickable { viewModel.login() }
+                                    .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp))
+                                    .padding(12.dp)
+                            ) {
+                                Text(
+                                    text = "Login",
+                                    color = Color.White,
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.fillMaxSize(),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Bạn chưa có tài khoản?",
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text(
+                                    text = "Đăng kí",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 16.sp,
+                                        color = Color.Blue,
+                                        textDecoration = TextDecoration.Underline
+                                    ),
+                                    modifier = Modifier.clickable {
+                                        navController.navigate(Screen.Register.route)
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
-
         }
 
     }

@@ -22,6 +22,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.book_flight_mobile.config.TokenManager
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.ui.screens.HomeScreen
 import com.example.book_flight_mobile.ui.screens.HomeViewModel
@@ -143,10 +144,12 @@ fun Navigation() {
         }
             composable(Screen.Profile.route) {
                 val profileModelView: ProfileModelView = hiltViewModel()
+                val tokenManager: TokenManager = hiltViewModel()
                 ProfileScreen(
                     navController = navController,
                     viewModel = profileModelView,
-                    mainViewModel = mainViewModel
+                    mainViewModel = mainViewModel,
+                    tokenManager = tokenManager
                 )
             }
             composable(Screen.HistoryTicket.route) {

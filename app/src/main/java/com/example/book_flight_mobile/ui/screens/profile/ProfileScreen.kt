@@ -16,16 +16,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,16 +47,13 @@ import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.R
 import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
-import com.example.book_flight_mobile.ui.screens.search.CustomTopBarSearchMain
-import com.example.book_flight_mobile.ui.screens.search.SelectDropdown
-import com.example.book_flight_mobile.ui.screens.search.listsearch.CustomTopBarSearch
-
-@OptIn(ExperimentalMaterial3Api::class)
+import com.example.book_flight_mobile.config.TokenManager
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
     viewModel: ProfileModelView,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    tokenManager: TokenManager
 ) {
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
@@ -95,30 +88,40 @@ fun ProfileScreen(
                         )
 
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End,
-                    ){
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
+                    val token = tokenManager.getToken()
+                    if (token == null ){
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
                         ){
-                            Text("Trần Chung Kiên",
-                                style = TextStyle(
-                                    fontWeight = FontWeight.W500,
-                                    fontSize = 16.sp,
-                                    lineHeight = 21.sp,
-                                ),)
+
                         }
-                        Image(
-                            painter = painterResource(id = R.drawable.user),
-                            contentDescription = "User avatar",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .border(2.dp, Color.Gray, CircleShape)
-                        )
+                    }else{
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                        ){
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                            ){
+                                Text("${tokenManager.getUserName()}",
+                                    style = TextStyle(
+                                        fontWeight = FontWeight.W500,
+                                        fontSize = 16.sp,
+                                        lineHeight = 21.sp,
+                                    ),)
+                            }
+                            Image(
+                                painter = painterResource(id = R.drawable.user),
+                                contentDescription = "User avatar",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .border(2.dp, Color.Gray, CircleShape)
+                            )
+                        }
                     }
                 }
             }

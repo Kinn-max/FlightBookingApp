@@ -3,6 +3,8 @@ package com.example.book_flight_mobile.ui.screens.loginandregister
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.config.TokenManager
+import com.example.book_flight_mobile.models.UserLogin
 import com.example.book_flight_mobile.models.UserResponse
 import com.example.book_flight_mobile.repositories.MainLog
 import com.example.book_flight_mobile.repositories.UserRepository
@@ -15,33 +17,48 @@ import javax.inject.Inject
 
 
 data class UserUiState(
-    val userLogin:UserResponse?,
-    val userRegister:UserResponse?,
+    val username: String = "",
+    val password: String = "",
+    val userRegister:UserResponse?=null,
     val status: LoadStatus = LoadStatus.Innit(),
 )
 @HiltViewModel
 class AuthModelView@Inject constructor (
     private val log: MainLog?,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val tokenManager: TokenManager
 ): ViewModel(){
-    private val _uiState = MutableStateFlow(SearchUiState())
+    private val _uiState = MutableStateFlow(UserUiState())
     val uiState = _uiState.asStateFlow()
+
+    fun updateUsername(username: String) {
+        _uiState.value = _uiState.value.copy(username = username)
+    }
+
+    fun updatePassword(password: String) {
+        _uiState.value = _uiState.value.copy(password = password)
+    }
 
     fun  reset(){
         _uiState.value = _uiState.value.copy(status = LoadStatus.Innit())
     }
-    fun login(userName: String, password:String) {
+    fun login() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
             try {
-                val user = userRepository.login(userName,password)
-//                _uiState.value = _uiState.value.copy(
-//                    flights =
-//                    status = LoadStatus.Success()
-//                )
+                var userLogin = UserLogin(uiState.value.username, uiState.value.password)
+                val result = userRepository?.login(userLogin)
+                result?.token?.let {
+                    tokenManager.saveToken(it)
+                }
+                result?.user?.name?.let {
+                    tokenManager.saveUserName(it)
+                }
+                _uiState.value = _uiState.value.copy(status = LoadStatus.Success())
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(status = LoadStatus.Error(e.message ?: "Unknown error"))
+                _uiState.value = _uiState.value.copy(status = LoadStatus.Error("Tài khoản hoặc mật khẩu không đúng!"))
             }
         }
     }
+
 }
