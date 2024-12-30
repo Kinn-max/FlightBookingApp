@@ -152,6 +152,7 @@ fun Navigation() {
                     tokenManager = tokenManager
                 )
             }
+
             composable(Screen.HistoryTicket.route) {
                 val profileModelView: ProfileModelView = hiltViewModel()
                 HistoryTicketScreen(

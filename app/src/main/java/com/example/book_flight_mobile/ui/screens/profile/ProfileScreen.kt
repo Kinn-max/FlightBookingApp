@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.R
@@ -55,6 +56,7 @@ fun ProfileScreen(
     mainViewModel: MainViewModel,
     tokenManager: TokenManager
 ) {
+
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.personalInformation()
@@ -88,41 +90,44 @@ fun ProfileScreen(
                         )
 
                     }
-                    val token = tokenManager.getToken()
-                    if (token == null ){
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ){
-
-                        }
-                    }else{
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End,
-                        ){
-                            Box(
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                            ){
-                                Text("${tokenManager.getUserName()}",
-                                    style = TextStyle(
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 16.sp,
-                                        lineHeight = 21.sp,
-                                    ),)
-                            }
-                            Image(
-                                painter = painterResource(id = R.drawable.user),
-                                contentDescription = "User avatar",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .border(2.dp, Color.Gray, CircleShape)
-                            )
-                        }
+                    Box{
+                        Text("${tokenManager.getUserName()}")
                     }
+//                    val token = tokenManager.getToken()
+//                    if (token == null ){
+//                        Row(
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.Start
+//                        ){
+//
+//                        }
+//                    }else{
+//                        Row(
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.End,
+//                        ){
+//                            Box(
+//                                modifier = Modifier
+//                                    .padding(end = 8.dp)
+//                            ){
+//                                Text("${tokenManager.getUserName()}",
+//                                    style = TextStyle(
+//                                        fontWeight = FontWeight.W500,
+//                                        fontSize = 16.sp,
+//                                        lineHeight = 21.sp,
+//                                    ),)
+//                            }
+//                            Image(
+//                                painter = painterResource(id = R.drawable.user),
+//                                contentDescription = "User avatar",
+//                                contentScale = ContentScale.Crop,
+//                                modifier = Modifier
+//                                    .size(28.dp)
+//                                    .clip(CircleShape)
+//                                    .border(2.dp, Color.Gray, CircleShape)
+//                            )
+//                        }
+//                    }
                 }
             }
         }

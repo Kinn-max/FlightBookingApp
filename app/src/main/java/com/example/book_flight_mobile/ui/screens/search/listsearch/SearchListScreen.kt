@@ -65,10 +65,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.Screen
+import com.example.book_flight_mobile.api.RetrofitInstance
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.models.PlaneResponse
+import com.example.book_flight_mobile.repositories.MainLog
 import com.example.book_flight_mobile.ui.screens.search.SearchModelView
 import com.example.book_flight_mobile.ui.screens.utils.CardLoading
 import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
@@ -94,25 +96,20 @@ fun SearchListScreen(
     departure: String,
     arrive: String
 ) {
-    var flightTmp = FlightRequest(
-        departureAirport = 3L,
-        arrivalAirport = 1L,
-        departureTime = "30-12-2024",
-        seatClass = "Business Class"
-    )
+
     val uiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
     val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    val currentDate = LocalDate.parse(flightTmp.departureTime, dateFormatter)
+    val currentDate = LocalDate.parse(flightRequest.departureTime, dateFormatter)
     val daysList = (0 until 7).map { currentDate.plusDays(it.toLong()) }
     var flightResponse by remember { mutableStateOf<FlightResponse?>(null) }
     val scope = rememberCoroutineScope()
     var selectedDate by remember { mutableStateOf(daysList.first()) }
     LaunchedEffect(Unit) {
-        viewModel.searchRequest(flightTmp)
+        viewModel.searchRequest(flightRequest)
     }
 
     ModalBottomSheetLayout(
@@ -172,7 +169,13 @@ fun SearchListScreen(
                                 date = day,
                                 dateFormatter = dateFormatter,
                                 isSelected = selectedDate == day,
-                                onClick = { selectedDate = it }
+                                onClick = {
+                                    selectedDate = it
+                                    val updatedFlightRequest = flightRequest.copy(
+                                        departureTime = it.format(dateFormatter)
+                                    )
+                                    viewModel.searchRequest(updatedFlightRequest)
+                                }
                             )
                         }
                     }

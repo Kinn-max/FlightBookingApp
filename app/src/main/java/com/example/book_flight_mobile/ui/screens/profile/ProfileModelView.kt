@@ -3,10 +3,8 @@ package com.example.book_flight_mobile.ui.screens.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.book_flight_mobile.common.enum.LoadStatus
-import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.models.TicketBookedInfo
 import com.example.book_flight_mobile.models.UserResponse
-import com.example.book_flight_mobile.repositories.FlightRepository
 import com.example.book_flight_mobile.repositories.MainLog
 import com.example.book_flight_mobile.repositories.TicketRepository
 import com.example.book_flight_mobile.repositories.UserRepository
@@ -45,7 +43,7 @@ class ProfileModelView @Inject constructor(
                     _uiState.value = _uiState.value.copy(info = info, status = LoadStatus.Success())
                 } else {
                     _uiState.value = _uiState.value.copy(
-                        status = LoadStatus.Error("UserRepository is null")
+                        status = LoadStatus.Error("Bạn chưa đăng nhập!")
                     )
                 }
             } catch (e: Exception) {

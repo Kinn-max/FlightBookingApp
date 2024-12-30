@@ -4,6 +4,7 @@ import com.example.book_flight_mobile.models.AirportResponse
 import com.example.book_flight_mobile.models.AuthResponse
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
+import com.example.book_flight_mobile.models.HomeResponse
 import com.example.book_flight_mobile.models.TicketBookedInfo
 import com.example.book_flight_mobile.models.UserLogin
 import com.example.book_flight_mobile.models.UserRegister
@@ -13,13 +14,14 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
+import javax.validation.Valid
 
 interface ApiService {
     @GET( "api/flight/by-user")
     suspend fun loadFlights(): List<FlightResponse>
 
-    @GET("api/airport")
-    suspend fun loadAirports(): List<AirportResponse>
+    @GET("api/home")
+    suspend fun loadHomeSearch(): HomeResponse
 
     @GET("api/ticket")
     suspend fun loadTicketInfoList(): List<TicketBookedInfo>
@@ -29,7 +31,7 @@ interface ApiService {
 
     @Headers("Content-Type: application/json")
     @POST("api/flight/search")
-    suspend fun searchFlight(@Body flightRequest: FlightRequest): List<FlightResponse>
+    suspend fun searchFlight(@Body  flightRequest: FlightRequest): List<FlightResponse>
 
     @GET("api/flight/detail/{id}")
     suspend fun getFlightById(@Path("id") id: Long): FlightResponse

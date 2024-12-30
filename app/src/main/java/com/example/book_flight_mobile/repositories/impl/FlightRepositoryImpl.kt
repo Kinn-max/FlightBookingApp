@@ -8,6 +8,7 @@ import com.example.book_flight_mobile.models.PlaneResponse
 import com.example.book_flight_mobile.models.SeatResponse
 import com.example.book_flight_mobile.repositories.FlightRepository
 import com.example.book_flight_mobile.repositories.MainLog
+import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import java.util.Date
 import javax.inject.Inject
@@ -23,7 +24,10 @@ class FlightRepositoryImpl @Inject constructor(
     override suspend fun searchFlight( flightRequest: FlightRequest): List<FlightResponse> {
         delay(1000)
         return try {
-            val flights = RetrofitInstance.api.loadFlights()
+            val gson = Gson()
+            val jsonRequest = gson.toJson(flightRequest)
+            log?.d("FlightRequest", jsonRequest)
+            val flights = RetrofitInstance.api.searchFlight(flightRequest)
             log?.d("FlightRepository", "Retrieved ${flights.size} flights")
             flights
         } catch (e: Exception) {

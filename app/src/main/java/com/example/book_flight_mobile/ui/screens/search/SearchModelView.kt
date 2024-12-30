@@ -6,6 +6,7 @@ import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.AirportResponse
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
+import com.example.book_flight_mobile.models.HomeResponse
 import com.example.book_flight_mobile.repositories.AirportRepository
 import com.example.book_flight_mobile.repositories.FlightRepository
 import com.example.book_flight_mobile.repositories.MainLog
@@ -19,7 +20,7 @@ data class SearchUiState(
     val flights:List<FlightResponse> = emptyList(),
     val status:LoadStatus = LoadStatus.Innit(),
     val flightSearch:List<FlightResponse> = emptyList(),
-    val airports: List<AirportResponse> = emptyList()
+    val homeSearch: HomeResponse? = null
 )
 @HiltViewModel
 class SearchModelView @Inject constructor (
@@ -47,13 +48,13 @@ class SearchModelView @Inject constructor (
             }
         }
     }
-    fun getAllAirports() {
+    fun getHomeSearch() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
             try {
-                val airports = airportRepository.loadAirport()
+                val homeSearch = airportRepository.getHomeSearch()
                 _uiState.value = _uiState.value.copy(
-                    airports = airports,
+                    homeSearch = homeSearch,
                     status = LoadStatus.Success()
                 )
             } catch (e: Exception) {

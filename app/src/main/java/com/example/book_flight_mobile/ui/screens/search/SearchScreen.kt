@@ -46,10 +46,13 @@ import com.example.book_flight_mobile.MainViewModel
 import com.example.book_flight_mobile.R
 import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.models.AirportResponse
 import com.example.book_flight_mobile.models.FlightRequest
+import com.example.book_flight_mobile.ui.screens.utils.reformatDate
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.validation.groups.Default
 
 @SuppressLint("NewApi")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,11 +63,14 @@ fun SearchScreen(
     mainViewModel: MainViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
-    val availableDestinations = listOf("Hà Nội", "Đà Nẵng", "Hồ Chí Minh", "Nha Trang")
-    val availableSeats = listOf("Business","Economy")
-    var selectedSeat by remember { mutableStateOf(availableSeats[0]) }
-    var selectedDeparture by remember { mutableStateOf(availableDestinations[0]) }
-    var selectedArrive by remember { mutableStateOf(availableDestinations[1]) }
+    LaunchedEffect(Unit) {
+        viewModel.getHomeSearch()
+    }
+    val availableDestinations = state.homeSearch?.airportResponses?: emptyList()
+    val availableSeats = state.homeSearch?.seatClasses
+    var selectedSeat by remember { mutableStateOf<String?>(null) }
+    var selectedDeparture by remember { mutableStateOf<AirportResponse?>(null) }
+    var selectedArrive by remember { mutableStateOf<AirportResponse?>(null) }
     var nameDeparture by remember { mutableStateOf("SGN") }
     var nameArrive by remember {mutableStateOf("HAN") }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -72,9 +78,6 @@ fun SearchScreen(
     var selectedDate = datePickerState.selectedDateMillis?.let {
         convertMillisToDate(it)
     } ?: ""
-    LaunchedEffect(Unit) {
-        viewModel.getAllAirports()
-    }
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -140,8 +143,9 @@ fun SearchScreen(
                                             imageVector = Icons.Filled.FlightTakeoff,
                                             contentDescription = "Flight"
                                         )
-                                        SelectDropdownCustom(
+                                        SelectDropdownCustomAirport(
                                             label = "Điểm đi",
+                                            nameDefault = "Nơi bạn xuất phát",
                                             options = availableDestinations,
                                             selectedOption = selectedDeparture,
                                             onOptionSelected = { selectedDeparture = it }
@@ -169,8 +173,9 @@ fun SearchScreen(
                                             imageVector = Icons.Filled.FlightLand,
                                             contentDescription = "Flight"
                                         )
-                                        SelectDropdownCustom(
+                                        SelectDropdownCustomAirport(
                                             label = "Điểm đến",
+                                            nameDefault = "Nơi bạn hạ cánh",
                                             options = availableDestinations,
                                             selectedOption = selectedArrive,
                                             onOptionSelected = { selectedArrive = it }
@@ -261,14 +266,31 @@ fun SearchScreen(
 
                                     ElevatedButton(
                                         onClick = {
-                                            val flightRequest =
-                                                FlightRequest(1L, 2L, "07-01-2024", "Business")
-                                            navController.navigate("${Screen.SearchList.route}?departureAirport=${flightRequest.departureAirport}&arrivalAirport=${flightRequest.arrivalAirport}&departureTime=${flightRequest.departureTime}&seatClass=${flightRequest.seatClass}&nameDeparture=${nameDeparture}&nameArrive=${nameArrive}")
+                                            if (selectedDeparture != null && selectedArrive != null && selectedDate !=null  && selectedSeat != null) {
+                                                val flightRequest = FlightRequest(
+                                                    departureAirport = selectedDeparture!!.id,
+                                                    arrivalAirport = selectedArrive!!.id,
+                                                    departureTime = reformatDate(selectedDate),
+                                                    seatClass = selectedSeat!!
+                                                )
+                                                navController.navigate(
+                                                    "${Screen.SearchList.route}?departureAirport=${flightRequest.departureAirport}" +
+                                                            "&arrivalAirport=${flightRequest.arrivalAirport}" +
+                                                            "&departureTime=${flightRequest.departureTime}" +
+                                                            "&seatClass=${flightRequest.seatClass}" +
+                                                            "&nameDeparture=${selectedDeparture!!.name}" +
+                                                            "&nameArrive=${selectedArrive!!.name}"
+                                                )
+                                            } else {
+                                                mainViewModel.setError("Bạn cần điền đủ thông tin tìm kiếm!")
+                                                viewModel.reset()
+                                            }
                                         },
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Text("Tìm chuyến bay")
                                     }
+
                                 }
                             }
                         }
@@ -340,7 +362,7 @@ fun DatePickerDialog(
 
 fun convertMillisToDate(millis: Long?): String {
     return millis?.let {
-        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         formatter.format(Date(it))
     } ?: ""
 }
@@ -350,18 +372,18 @@ fun convertMillisToDate(millis: Long?): String {
 @Composable
 fun SelectDropdownCustom(
     label: String,
-    options: List<String>,
-    selectedOption: String,
+    options: List<String>?,
+    selectedOption: String?,
     onOptionSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-
+    val nonNullOptions = options ?: listOf()
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
     ) {
         OutlinedTextField(
-            value = selectedOption,
+            value = selectedOption?:"--Chọn--",
             onValueChange = { },
             label = { Text(label) },
             trailingIcon = {
@@ -386,7 +408,7 @@ fun SelectDropdownCustom(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            options.forEach { option ->
+            options?.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option) },
                     onClick = {
@@ -398,6 +420,59 @@ fun SelectDropdownCustom(
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SelectDropdownCustomAirport(
+    label: String,
+    nameDefault: String,
+    options: List<AirportResponse>?,
+    selectedOption: AirportResponse?,
+    onOptionSelected: (AirportResponse) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+        OutlinedTextField(
+            value = selectedOption?.name?:"${nameDefault}",
+            onValueChange = { },
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown"
+                )
+            },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+            ),
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options?.forEach { option ->
+                DropdownMenuItem(
+                    text = {  Text("${option.name} - ${option.code}")},
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -409,7 +484,6 @@ fun SelectDropdown(
     onOptionSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
@@ -487,7 +561,7 @@ fun HistorySearch() {
             Row(modifier = Modifier.fillMaxWidth().padding(top =  8.dp),horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
                     Text(
-                        "Ngày: 03/11/2021",
+                        "Ngày: 03/11/2024",
                         style = TextStyle(
                             color = Color(0xFF808089),
                             fontSize = 14.sp,

@@ -24,6 +24,7 @@ class TokenManager @Inject constructor(private val context: Context) {
         editor.remove("auth_token")
         editor.apply()
     }
+
     fun saveUserName(name: String) {
         val editor = sharedPreferences.edit()
         editor.putString("user_name", name)
