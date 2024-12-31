@@ -54,7 +54,7 @@ fun ProfileScreen(
     navController: NavHostController,
     viewModel: ProfileModelView,
     mainViewModel: MainViewModel,
-    tokenManager: TokenManager
+
 ) {
 
     val state by viewModel.uiState.collectAsState()
@@ -90,44 +90,41 @@ fun ProfileScreen(
                         )
 
                     }
-                    Box{
-                        Text("${tokenManager.getUserName()}")
+
+                    if(state.info == null){
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ){
+
+                        }
+                    }else{
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                        ){
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                            ){
+                                Text("${state.info?.fullName}",
+                                    style = TextStyle(
+                                        fontWeight = FontWeight.W500,
+                                        fontSize = 16.sp,
+                                        lineHeight = 21.sp,
+                                    ),)
+                            }
+                            Image(
+                                painter = painterResource(id = R.drawable.user),
+                                contentDescription = "User avatar",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .border(2.dp, Color.Gray, CircleShape)
+                            )
+                        }
                     }
-//                    val token = tokenManager.getToken()
-//                    if (token == null ){
-//                        Row(
-//                            verticalAlignment = Alignment.CenterVertically,
-//                            horizontalArrangement = Arrangement.Start
-//                        ){
-//
-//                        }
-//                    }else{
-//                        Row(
-//                            verticalAlignment = Alignment.CenterVertically,
-//                            horizontalArrangement = Arrangement.End,
-//                        ){
-//                            Box(
-//                                modifier = Modifier
-//                                    .padding(end = 8.dp)
-//                            ){
-//                                Text("${tokenManager.getUserName()}",
-//                                    style = TextStyle(
-//                                        fontWeight = FontWeight.W500,
-//                                        fontSize = 16.sp,
-//                                        lineHeight = 21.sp,
-//                                    ),)
-//                            }
-//                            Image(
-//                                painter = painterResource(id = R.drawable.user),
-//                                contentDescription = "User avatar",
-//                                contentScale = ContentScale.Crop,
-//                                modifier = Modifier
-//                                    .size(28.dp)
-//                                    .clip(CircleShape)
-//                                    .border(2.dp, Color.Gray, CircleShape)
-//                            )
-//                        }
-//                    }
                 }
             }
         }
@@ -160,28 +157,28 @@ fun ProfileScreen(
                 else -> {
                     if(state.info == null){
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                                 Text(
                                     "Bạn phải đăng nhập trước !!!",
                                 )
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                ElevatedButton(onClick = {
-                                    navController.navigate(Screen.Login.route)
-                                }, modifier = Modifier.padding(16.dp)) {
-                                    Text("Đăng nhập")
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        ElevatedButton(onClick = {
+                                            navController.navigate(Screen.Login.route)
+                                        }, modifier = Modifier.padding(16.dp)) {
+                                            Text("Đăng nhập")
+                                        }
+                                    }
                                 }
-                            }
                         }
                     }else{
                         Column(
@@ -230,8 +227,8 @@ fun ProfileScreen(
                                                     horizontalAlignment = Alignment.End
                                                 ) {
                                                     Text(
-                                                        text = "Trần Chung Kiên",
-                                                        style = TextStyle(
+                                                            text = "${state.info?.fullName ?: "Chưa có thông tin"}",
+                                                            style = TextStyle(
                                                             fontWeight = FontWeight.W400,
                                                             fontSize = 16.sp,
                                                             lineHeight = 21.sp,
@@ -264,7 +261,7 @@ fun ProfileScreen(
                                                     horizontalAlignment = Alignment.End
                                                 ) {
                                                     Text(
-                                                        text = "07/01/2004",
+                                                        text = "${state.info?.dateOfBirth ?: "Chưa có thông tin"}",
                                                         style = TextStyle(
                                                             fontWeight = FontWeight.W400,
                                                             fontSize = 16.sp,
@@ -294,11 +291,11 @@ fun ProfileScreen(
                                                     )
                                                 }
                                                 Column(
-                                                    modifier = Modifier.weight(1f),
+                                                    modifier = Modifier.weight(2f),
                                                     horizontalAlignment = Alignment.End
                                                 ) {
                                                     Text(
-                                                        text = "kiendeptrai@gmail.com",
+                                                        text = "${state.info?.email ?: "Chưa có thông tin"}",
                                                         style = TextStyle(
                                                             fontWeight = FontWeight.W400,
                                                             fontSize = 16.sp,
@@ -332,7 +329,7 @@ fun ProfileScreen(
                                                     horizontalAlignment = Alignment.End
                                                 ) {
                                                     Text(
-                                                        text = "123456789",
+                                                        text = "${state.info?.phoneNumber ?: "Chưa có thông tin"}",
                                                         style = TextStyle(
                                                             fontWeight = FontWeight.W400,
                                                             fontSize = 16.sp,
@@ -366,7 +363,7 @@ fun ProfileScreen(
                                                     horizontalAlignment = Alignment.End
                                                 ) {
                                                     Text(
-                                                        text = "Đức Thọ, Hà Tĩnh",
+                                                        text = "${state.info?.address ?: "Chưa có thông tin"}",
                                                         style = TextStyle(
                                                             fontWeight = FontWeight.W400,
                                                             fontSize = 16.sp,

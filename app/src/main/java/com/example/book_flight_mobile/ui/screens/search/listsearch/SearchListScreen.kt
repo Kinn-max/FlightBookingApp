@@ -693,16 +693,6 @@ fun FlightCardShow(flight: FlightResponse, onFlightSelected: (FlightResponse) ->
                                 )
                             )
                         }
-//                        Text(
-//                            flight.airline,
-//                            style = TextStyle(
-//                                color = Color(0xFF27272A),
-//                                fontWeight = FontWeight.W500,
-//                                fontSize = 14.sp,
-//                                lineHeight = 18.sp
-//                            ),
-//                            modifier = Modifier.align(Alignment.CenterVertically)
-//                        )
                     }
                 }
                 Column(

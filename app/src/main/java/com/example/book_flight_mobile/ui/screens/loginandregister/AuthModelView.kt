@@ -2,6 +2,8 @@ package com.example.book_flight_mobile.ui.screens.loginandregister
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
+import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.config.TokenManager
 import com.example.book_flight_mobile.models.UserLogin
@@ -20,13 +22,14 @@ data class UserUiState(
     val username: String = "",
     val password: String = "",
     val userRegister:UserResponse?=null,
+    val userId:Long?= -1,
     val status: LoadStatus = LoadStatus.Innit(),
 )
 @HiltViewModel
 class AuthModelView@Inject constructor (
     private val log: MainLog?,
     private val userRepository: UserRepository,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
 ): ViewModel(){
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState = _uiState.asStateFlow()
@@ -54,7 +57,7 @@ class AuthModelView@Inject constructor (
                 result?.user?.name?.let {
                     tokenManager.saveUserName(it)
                 }
-                _uiState.value = _uiState.value.copy(status = LoadStatus.Success())
+                _uiState.value = _uiState.value.copy( status = LoadStatus.Success())
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(status = LoadStatus.Error("Tài khoản hoặc mật khẩu không đúng!"))
             }

@@ -48,7 +48,6 @@ fun LoginScreen(
     viewModel: AuthModelView,
     mainViewModel: MainViewModel,
 ) {
-    val tokenManager: TokenManager
     val state = viewModel.uiState.collectAsState()
     Scaffold (
         topBar = {

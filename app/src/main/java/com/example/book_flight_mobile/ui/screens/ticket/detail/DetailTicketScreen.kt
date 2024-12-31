@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -65,6 +66,10 @@ import com.example.book_flight_mobile.ui.screens.profile.ProfileModelView
 import com.example.book_flight_mobile.ui.screens.search.listsearch.CustomTopBarSearch
 import com.example.book_flight_mobile.ui.screens.ticket.TicketModelView
 import com.example.book_flight_mobile.ui.screens.utils.CardLoading
+import com.example.book_flight_mobile.ui.screens.utils.base64ToBitmap
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun DetailTicketScreen(
@@ -73,11 +78,11 @@ fun DetailTicketScreen(
     mainViewModel: MainViewModel,
     id: Long
 ) {
-    val state = viewModel.uiState.collectAsState()
-    val scrollState = rememberScrollState()
-    LaunchedEffect(id) {
+    LaunchedEffect(Unit) {
         viewModel.getTicketById(id)
     }
+    val state = viewModel.uiState.collectAsState()
+    val scrollState = rememberScrollState()
     Scaffold(
         topBar = {
             CustomTopBarSearch(
@@ -117,8 +122,8 @@ fun DetailTicketScreen(
 
             is LoadStatus.Success -> {
                 if (ticket != null) {
-                    Column(modifier = Modifier.padding(padding),) {
-                        TicketDetailContent(ticket,scrollState)
+                        Column(modifier = Modifier.padding(padding),) {
+                            TicketDetailContent(ticket, scrollState)
                     }
                 } else {
                     Box(
@@ -161,7 +166,7 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Chuyến đi: Hồ Chí Minh - Hà Nội",
+                text = "Chuyến đi: ${ticket.departureAirportName} - ${ticket.arrivalAirportName}",
                 style = TextStyle(
                     color = Color(0xFF27272A),
                     fontSize = 18.sp,
@@ -209,8 +214,9 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.Start
                             ) {
+                                val textSeatClass = if (ticket.seatClass == "Business Class") "Ghế thương gia" else "Ghế thường"
                                 Text(
-                                    "Ghế thương gia",
+                                    textSeatClass,
                                     style = TextStyle(
                                         fontWeight = FontWeight.W400,
                                         fontSize = 14.sp,
@@ -223,8 +229,10 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.End
                             ) {
+                                val formattedPrice =
+                                    NumberFormat.getNumberInstance(Locale("vi", "VN")).format(ticket.price - ticket.luggage)
                                 Text(
-                                    text = "${ticket.price}",
+                                    text = "${formattedPrice} đ",
                                     style = TextStyle(
                                         fontWeight = FontWeight.W400,
                                         fontSize = 14.sp,
@@ -305,8 +313,10 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                                 modifier = Modifier.weight(1f),
                                 horizontalAlignment = Alignment.End
                             ) {
+                                val formattedLuggage =
+                                    NumberFormat.getNumberInstance(Locale("vi", "VN")).format(ticket.luggage)
                                 Text(
-                                    text = "0 đ",
+                                    text = "${formattedLuggage} đ",
                                     style = TextStyle(
                                         fontWeight = FontWeight.W400,
                                         fontSize = 14.sp,
@@ -394,8 +404,10 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.End
                     ) {
+                        val formattedPrice =
+                            NumberFormat.getNumberInstance(Locale("vi", "VN")).format(ticket.price)
                         Text(
-                            text = "2.000.000 đ",
+                            text = "${formattedPrice} đ",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif,
@@ -440,7 +452,7 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            "Họ và tên",
+                            ticket.name,
                             style = TextStyle(
                                 fontWeight = FontWeight.W700,
                                 fontSize = 14.sp,
@@ -500,7 +512,7 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "64564565646",
+                            ticket.phone,
                             style = TextStyle(
                                 fontWeight = FontWeight.W400,
                                 fontSize = 14.sp,
@@ -546,7 +558,7 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "kien2004@gmail.com",
+                            ticket.email,
                             style = TextStyle(
                                 fontWeight = FontWeight.W400,
                                 fontSize = 14.sp,
@@ -581,19 +593,32 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.vietjet),
-                            contentDescription = "Airline logo",
-                            modifier = Modifier
-                                .size(60.dp)
-                                .padding(end = 6.dp)
-                        )
+                        val bitmap = base64ToBitmap(ticket.logo)
+                        val imageBitmap = bitmap?.asImageBitmap()
+                        if (imageBitmap != null) {
+                            Image(
+                                bitmap = imageBitmap,
+                                contentDescription = "Airline logo",
+                                modifier = Modifier
+                                    .size(height = 70.dp, width = 100.dp)
+
+                            )
+                        } else {
+                            Text(
+                                text = "No Image",
+                                color = Color.Gray,
+                                style = TextStyle(
+                                    fontWeight = FontWeight.W400,
+                                    fontSize = 14.sp
+                                )
+                            )
+                        }
                         Column(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).padding(start = 8.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
-                                ticket.departureAirportName,
+                                ticket.airlineName,
                                 style = TextStyle(
                                     color = Color(0xFF27272A),
                                     fontWeight = FontWeight.W500,
@@ -602,7 +627,7 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                                 )
                             )
                             Text(
-                                text = "VN-158",
+                                text = "${ticket.flightCode}",
                                 style = TextStyle(
                                     color = Color(0xFF808089),
                                     fontFamily = FontFamily.Default,
@@ -641,8 +666,10 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                            val formattedTime = dateFormat.format(ticket.departureTime)
                             Text(
-                                "07:45",
+                                formattedTime,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -650,8 +677,10 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dayFormat = SimpleDateFormat("EE, dd/MM/yyyy", Locale("vi", "VN"))
+                            val formattedDay = dayFormat.format(ticket.departureTime)
                             Text(
-                                "T7, 05/02/2022",
+                                formattedDay,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -665,8 +694,11 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                             modifier = Modifier.weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            val durationMillis = ticket.arrivalTime.time - ticket.departureTime.time
+                            val hours = (durationMillis / (1000 * 60 * 60)).toInt()
+                            val minutes = (durationMillis / (1000 * 60) % 60).toInt()
                             Text(
-                                "1g 15p",
+                                text = "${hours}g ${minutes}p",
                                 color = Color(0xFF808089),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W400,
@@ -720,8 +752,10 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                            val formattedTime = dateFormat.format(ticket.arrivalTime)
                             Text(
-                                "07:45",
+                                formattedTime,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,
@@ -729,8 +763,10 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                                     lineHeight = 21.sp
                                 )
                             )
+                            val dayFormat = SimpleDateFormat("EE, dd/MM/yyyy", Locale("vi", "VN"))
+                            val formattedDay = dayFormat.format(ticket.arrivalTime)
                             Text(
-                                "T7, 05/02/2022",
+                                formattedDay,
                                 color = Color(0xFF27272A),
                                 style = TextStyle(
                                     fontWeight = FontWeight.W500,

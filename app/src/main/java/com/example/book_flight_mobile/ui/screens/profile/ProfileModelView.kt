@@ -40,7 +40,7 @@ class ProfileModelView @Inject constructor(
             try {
                 val info = userRepository?.loadUserInfo()
                 if (info != null) {
-                    _uiState.value = _uiState.value.copy(info = info, status = LoadStatus.Success())
+                    _uiState.value = _uiState.value.copy(info = info,  ticketList = info.bookingList, status = LoadStatus.Success())
                 } else {
                     _uiState.value = _uiState.value.copy(
                         status = LoadStatus.Error("Bạn chưa đăng nhập!")
@@ -53,25 +53,4 @@ class ProfileModelView @Inject constructor(
         }
     }
 
-    fun ticketList() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
-            try {
-                val ticketList = ticketRepository?.loadTicketInfoList()
-                if (ticketList != null) {
-                    _uiState.value = _uiState.value.copy(
-                        ticketList = ticketList,
-                        status = LoadStatus.Success()
-                    )
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        status = LoadStatus.Error("TicketRepository is null")
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.value =
-                    _uiState.value.copy(status = LoadStatus.Error(e.message ?: "Unknown error"))
-            }
-        }
-    }
 }

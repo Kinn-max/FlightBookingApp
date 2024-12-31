@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -59,6 +60,9 @@ import com.example.book_flight_mobile.ui.screens.profile.ProfileModelView
 import com.example.book_flight_mobile.ui.screens.search.listsearch.CustomTopBarSearch
 import com.example.book_flight_mobile.ui.screens.utils.CardLoading
 import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
+import java.text.NumberFormat
+import java.util.Locale
+
 @Composable
 fun HistoryTicketScreen(
     navController: NavHostController,
@@ -67,7 +71,7 @@ fun HistoryTicketScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
-        viewModel.ticketList()
+        viewModel.personalInformation()
     }
 
     Scaffold(
@@ -106,7 +110,6 @@ fun HistoryTicketScreen(
                     mainViewModel.setError(uiState.status.description)
                     viewModel.reset()
                 }
-
                 is LoadStatus.Success -> {
                     if (uiState.ticketList.isEmpty()) {
                         EmptyFlight()
@@ -141,7 +144,7 @@ fun HistoryTicketScreen(
 
 }
 @Composable
-fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostController){
+fun SummaryTicketHistory(ticket: TicketBookedInfo, navController: NavHostController) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -256,7 +259,7 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                     .padding(top = 10.dp),
             ) {
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(2f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row(
@@ -287,8 +290,10 @@ fun SummaryTicketHistory(ticket: TicketBookedInfo,navController: NavHostControll
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End
                 ) {
+                    val formattedPrice =
+                        NumberFormat.getNumberInstance(Locale("vi", "VN")).format(ticket.price)
                     Text(
-                        text = "${ticket.price} đ",
+                        text = "${formattedPrice} đ",
                         style = TextStyle(
                             color = Color(0xFF1A94FF),
                             fontFamily = FontFamily.Default,

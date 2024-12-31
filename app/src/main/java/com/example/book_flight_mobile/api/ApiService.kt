@@ -26,7 +26,7 @@ interface ApiService {
     @GET("api/ticket")
     suspend fun loadTicketInfoList(): List<TicketBookedInfo>
 
-    @GET("api/user")
+    @GET("/api/user/profile")
     suspend fun loadUserInfo(): UserResponse
 
     @Headers("Content-Type: application/json")
@@ -42,6 +42,9 @@ interface ApiService {
     @POST("/api/user/register")
     suspend fun register(userRegister: UserRegister)
 
+    @GET("api/ticket/by-user")
+    suspend fun  getDetailTicketByUser():TicketBookedInfo
+
     @GET("api/ticket/{id}")
-    suspend fun  getTicketById(@Path("id") id: Long):TicketBookedInfo
+    suspend fun  getDetailTicketById(@Path("id") id: Long):TicketBookedInfo
 }

@@ -144,12 +144,10 @@ fun Navigation() {
         }
             composable(Screen.Profile.route) {
                 val profileModelView: ProfileModelView = hiltViewModel()
-                val tokenManager: TokenManager = hiltViewModel()
                 ProfileScreen(
                     navController = navController,
                     viewModel = profileModelView,
                     mainViewModel = mainViewModel,
-                    tokenManager = tokenManager
                 )
             }
 
@@ -162,7 +160,7 @@ fun Navigation() {
                 )
             }
             composable(
-                Screen.TicketHistoryDetail.route + "?id={id}",
+                route = Screen.TicketHistoryDetail.route + "?id={id}",
                 arguments = listOf(
                     navArgument("id") {
                         type = NavType.LongType
@@ -170,7 +168,7 @@ fun Navigation() {
                     }
                 )
             ) { backStackEntry ->
-                val ticketId = backStackEntry.arguments?.getLong("id") ?: -1
+                val ticketId = backStackEntry.arguments?.getLong("id") ?: -1L
                 if (ticketId != -1L) {
                     DetailTicketScreen(
                         navController = navController,
@@ -180,6 +178,7 @@ fun Navigation() {
                     )
                 }
             }
+
             composable(Screen.Login.route) {
                 val loginModelView: AuthModelView = hiltViewModel()
                 LoginScreen(
