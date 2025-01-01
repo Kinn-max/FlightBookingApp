@@ -67,6 +67,10 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
     implementation("javax.validation:validation-api:2.0.1.Final")
     implementation ("androidx.compose.material:material:1.5.4")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("androidx.webkit:webkit:1.5.0")
+    implementation ("androidx.browser:browser:1.5.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

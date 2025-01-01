@@ -452,7 +452,7 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            ticket.name,
+                            "Họ và tên",
                             style = TextStyle(
                                 fontWeight = FontWeight.W700,
                                 fontSize = 14.sp,
@@ -466,7 +466,7 @@ fun TicketDetailContent( ticket: TicketBookedInfo,scrollState: ScrollState) {
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "Trần Chung Kiên",
+                            text = ticket.name,
                             style = TextStyle(
                                 fontWeight = FontWeight.W400,
                                 fontSize = 14.sp,
@@ -618,7 +618,7 @@ fun TicketCardDetail(ticket: TicketBookedInfo) {
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
-                                ticket.airlineName,
+                               "${ ticket.airlineName} - ${ticket.seatClass}",
                                 style = TextStyle(
                                     color = Color(0xFF27272A),
                                     fontWeight = FontWeight.W500,

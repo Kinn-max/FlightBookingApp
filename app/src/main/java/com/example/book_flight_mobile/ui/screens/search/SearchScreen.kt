@@ -48,7 +48,9 @@ import com.example.book_flight_mobile.Screen
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.AirportResponse
 import com.example.book_flight_mobile.models.FlightRequest
+import com.example.book_flight_mobile.models.LuggageResponse
 import com.example.book_flight_mobile.ui.screens.utils.reformatDate
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -463,6 +465,61 @@ fun SelectDropdownCustomAirport(
             options?.forEach { option ->
                 DropdownMenuItem(
                     text = {  Text("${option.name} - ${option.code}")},
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SelectDropdownCustomLuggages(
+    label: String,
+    nameDefault: String,
+    options: List<LuggageResponse>?,
+    selectedOption: LuggageResponse?,
+    onOptionSelected: (LuggageResponse) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+        OutlinedTextField(
+            value = selectedOption?.luggageType?.toString() ?: nameDefault,
+            onValueChange = { },
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown"
+                )
+            },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface
+            ),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options?.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        val optionPrice = NumberFormat.getNumberInstance(Locale("vi", "VN")).format(option.price)
+                        Text("${option.weight}kg - ${optionPrice} đ")
+                    },
                     onClick = {
                         onOptionSelected(option)
                         expanded = false

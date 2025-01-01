@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.book_flight_mobile.common.enum.LoadStatus
 import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.models.TicketBookedInfo
+import com.example.book_flight_mobile.models.TicketRequest
 import com.example.book_flight_mobile.models.UserResponse
 import com.example.book_flight_mobile.repositories.FlightRepository
 import com.example.book_flight_mobile.repositories.MainLog
+import com.example.book_flight_mobile.repositories.PaymentRepository
 import com.example.book_flight_mobile.repositories.TicketRepository
 import com.example.book_flight_mobile.repositories.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +23,8 @@ data class TicketUiState(
     val ticket: TicketBookedInfo? = null,
     val flight: FlightResponse? = null,
     val status: LoadStatus = LoadStatus.Innit(),
-    val ticketList: List<TicketBookedInfo> = emptyList()
+    val ticketList: List<TicketBookedInfo> = emptyList(),
+    val paymentUrl: String? = null
 )
 
 @HiltViewModel
@@ -30,6 +33,7 @@ class TicketModelView @Inject constructor(
     private val flightRepository: FlightRepository?,
     private val ticketRepository: TicketRepository?,
     private val userRepository: UserRepository?,
+    private val paymentRepository: PaymentRepository?
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TicketUiState())
@@ -92,4 +96,20 @@ class TicketModelView @Inject constructor(
             }
         }
     }
+    fun payment(ticketRequest: TicketRequest) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
+            try {
+                val paymentUrl  = paymentRepository?.createPaymentVnPay(ticketRequest)
+                _uiState.value = _uiState.value.copy(
+                    status = LoadStatus.Success(),
+                    paymentUrl = paymentUrl
+                )
+            } catch (e: Exception) {
+                _uiState.value =
+                    _uiState.value.copy(status = LoadStatus.Error(e.message ?: "Unknown error"))
+            }
+        }
+    }
+
 }

@@ -135,9 +135,12 @@ fun SearchListScreen(
                     plane = PlaneResponse(id = 0L,0,0,"",""),
                     ecoPrice = 0.0,
                     busPrice = 0.0,
+                    availableBus = 0,
+                    availableEco = 0,
                     status = true,
                     ticketId = 0L,
-                    seats = emptyList()
+                    seats = emptyList(),
+                    luggages = emptyList()
                 ),
                 navController = navController
             )

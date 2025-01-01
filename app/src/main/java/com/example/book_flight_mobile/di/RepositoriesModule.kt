@@ -4,11 +4,13 @@ import com.example.book_flight_mobile.api.ApiService
 import com.example.book_flight_mobile.repositories.AirportRepository
 import com.example.book_flight_mobile.repositories.FlightRepository
 import com.example.book_flight_mobile.repositories.MainLog
+import com.example.book_flight_mobile.repositories.PaymentRepository
 import com.example.book_flight_mobile.repositories.TicketRepository
 import com.example.book_flight_mobile.repositories.UserRepository
 import com.example.book_flight_mobile.repositories.impl.AirportRepositoryImpl
 import com.example.book_flight_mobile.repositories.impl.FlightRepositoryImpl
 import com.example.book_flight_mobile.repositories.impl.MainLogImpl
+import com.example.book_flight_mobile.repositories.impl.PaymentRepositoryImpl
 import com.example.book_flight_mobile.repositories.impl.TicketRepositoryImpl
 import com.example.book_flight_mobile.repositories.impl.UserRepositoryImpl
 import dagger.Binds
@@ -41,4 +43,8 @@ abstract class RepositoriesModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(userRepository: UserRepositoryImpl): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPaymentRepository(paymentRepository: PaymentRepositoryImpl): PaymentRepository
 }

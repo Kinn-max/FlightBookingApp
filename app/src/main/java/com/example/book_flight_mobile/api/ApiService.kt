@@ -6,14 +6,17 @@ import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.models.HomeResponse
 import com.example.book_flight_mobile.models.TicketBookedInfo
+import com.example.book_flight_mobile.models.TicketRequest
 import com.example.book_flight_mobile.models.UserLogin
 import com.example.book_flight_mobile.models.UserRegister
 import com.example.book_flight_mobile.models.UserResponse
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Streaming
 import javax.validation.Valid
 
 interface ApiService {
@@ -38,6 +41,10 @@ interface ApiService {
 
     @POST("api/auth/login")
     suspend fun login(@Body userLogin: UserLogin): AuthResponse
+
+    @Headers("Content-Type: application/json")
+    @POST("api/payment/create_payment_vnpay")
+    suspend fun createPaymentVnPay(@Body ticketRequest: TicketRequest): ResponseBody
 
     @POST("/api/user/register")
     suspend fun register(userRegister: UserRegister)

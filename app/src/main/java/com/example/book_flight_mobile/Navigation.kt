@@ -29,6 +29,7 @@ import com.example.book_flight_mobile.ui.screens.HomeViewModel
 import com.example.book_flight_mobile.ui.screens.loginandregister.AuthModelView
 import com.example.book_flight_mobile.ui.screens.loginandregister.LoginScreen
 import com.example.book_flight_mobile.ui.screens.loginandregister.RegisterScreen
+import com.example.book_flight_mobile.ui.screens.payment.PaymentScreen
 import com.example.book_flight_mobile.ui.screens.profile.ProfileModelView
 import com.example.book_flight_mobile.ui.screens.profile.ProfileScreen
 import com.example.book_flight_mobile.ui.screens.ticket.HistoryTicketScreen
@@ -44,7 +45,7 @@ sealed class Screen(val route:String){
     object Login:Screen("login")
     object Register:Screen("register")
     object TicketHistoryDetail:Screen("ticket_history_detail")
-    object Detail:Screen("detail")
+    object Payment:Screen("payment")
     object SummaryTicket:Screen("summary")
     object Search:Screen("search")
     object HistoryTicket:Screen("booking_history")
@@ -175,6 +176,24 @@ fun Navigation() {
                         viewModel = hiltViewModel(),
                         mainViewModel = mainViewModel,
                         id = ticketId
+                    )
+                }
+            }
+
+            composable(
+                route = Screen.Payment.route + "?url={url}",
+                arguments = listOf(
+                    navArgument("url") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+                val url = backStackEntry.arguments?.getString("url") ?: ""
+                if (url.isNotEmpty()) {
+                    PaymentScreen(
+                        navController = navController,
+                        url = url
                     )
                 }
             }
