@@ -31,8 +31,7 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun login(userLogin: UserLogin): AuthResponse {
         return try {
-            val hi = UserLogin(email = "kinmax200418@gmail.com", password = "123")
-            val token = RetrofitInstance.api.login(hi)
+            val token = RetrofitInstance.api.login(userLogin)
             log?.d("UserLogin", "Retrieved user${token.user}")
             token
         } catch (e: Exception) {

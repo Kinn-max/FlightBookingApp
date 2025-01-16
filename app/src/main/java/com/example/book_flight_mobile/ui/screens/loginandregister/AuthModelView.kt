@@ -45,7 +45,7 @@ class AuthModelView@Inject constructor (
     fun  reset(){
         _uiState.value = _uiState.value.copy(status = LoadStatus.Innit())
     }
-    fun login() {
+    fun login(navController: NavHostController) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
             try {
@@ -58,6 +58,7 @@ class AuthModelView@Inject constructor (
                     tokenManager.saveUserName(it)
                 }
                 _uiState.value = _uiState.value.copy( status = LoadStatus.Success())
+                navController.navigate(Screen.Profile.route)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(status = LoadStatus.Error("Tài khoản hoặc mật khẩu không đúng!"))
             }

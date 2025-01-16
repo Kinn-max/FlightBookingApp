@@ -3,6 +3,7 @@ package com.example.book_flight_mobile.ui.screens.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.config.TokenManager
 import com.example.book_flight_mobile.models.AirportResponse
 import com.example.book_flight_mobile.models.FlightRequest
 import com.example.book_flight_mobile.models.FlightResponse
@@ -20,13 +21,15 @@ data class SearchUiState(
     val flights:List<FlightResponse> = emptyList(),
     val status:LoadStatus = LoadStatus.Innit(),
     val flightSearch:List<FlightResponse> = emptyList(),
-    val homeSearch: HomeResponse? = null
+    val homeSearch: HomeResponse? = null,
+    val token:Boolean = false
 )
 @HiltViewModel
 class SearchModelView @Inject constructor (
     private val log: MainLog?,
     private val flightRepository: FlightRepository,
-    private val airportRepository: AirportRepository
+    private val airportRepository: AirportRepository,
+    private val tokenManager: TokenManager,
 ):ViewModel(){
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState = _uiState.asStateFlow()
@@ -69,6 +72,22 @@ class SearchModelView @Inject constructor (
                 val flights = flightRepository.searchFlight(flightRequest)
                 _uiState.value = _uiState.value.copy(
                     flightSearch = flights,
+                    status = LoadStatus.Success()
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(status = LoadStatus.Error(e.message ?: "Unknown error"))
+            }
+        }
+    }
+    fun checkToken() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
+            try {
+               val token = tokenManager.getToken()
+                var check = false
+                if (token != null ){check =true}
+                _uiState.value = _uiState.value.copy(
+                    token= check,
                     status = LoadStatus.Success()
                 )
             } catch (e: Exception) {

@@ -431,7 +431,9 @@ fun ProfileScreen(
                                             modifier = Modifier.weight(1f),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            ElevatedButton(onClick = { }, modifier = Modifier.padding(16.dp)) {
+                                            ElevatedButton(
+                                                onClick = {viewModel.logout()
+                                                navController.navigate(Screen.Profile.route) }, modifier = Modifier.padding(16.dp)) {
                                                 Text("Đăng xuất")
                                             }
                                         }

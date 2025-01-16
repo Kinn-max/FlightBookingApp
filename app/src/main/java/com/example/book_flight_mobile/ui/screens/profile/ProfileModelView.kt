@@ -3,7 +3,9 @@ package com.example.book_flight_mobile.ui.screens.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.book_flight_mobile.common.enum.LoadStatus
+import com.example.book_flight_mobile.config.TokenManager
 import com.example.book_flight_mobile.models.TicketBookedInfo
+import com.example.book_flight_mobile.models.UserLogin
 import com.example.book_flight_mobile.models.UserResponse
 import com.example.book_flight_mobile.repositories.MainLog
 import com.example.book_flight_mobile.repositories.TicketRepository
@@ -17,14 +19,15 @@ import javax.inject.Inject
 data class ProfileUiState(
     val info: UserResponse? = null,
     val status: LoadStatus = LoadStatus.Innit(),
-    val ticketList: List<TicketBookedInfo> = emptyList()
-)
+    val ticketList: List<TicketBookedInfo> = emptyList(),
 
+)
 @HiltViewModel
 class ProfileModelView @Inject constructor(
     private val log: MainLog?,
     private val userRepository: UserRepository?,
-    private val ticketRepository: TicketRepository?
+    private val ticketRepository: TicketRepository?,
+    private val tokenManager: TokenManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -49,6 +52,17 @@ class ProfileModelView @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value =
                     _uiState.value.copy(status = LoadStatus.Error(e.message ?: "Unknown error"))
+            }
+        }
+    }
+    fun logout() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(status = LoadStatus.Loading())
+            try {
+                tokenManager.clearToken()
+                _uiState.value = _uiState.value.copy( status = LoadStatus.Success())
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(status = LoadStatus.Error("Đã có lỗi xảy ra!"))
             }
         }
     }

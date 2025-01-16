@@ -51,6 +51,8 @@ sealed class Screen(val route:String){
     object HistoryTicket:Screen("booking_history")
     object Profile:Screen("profile")
     object SearchList:Screen("search_list")
+    object FailureScreen:Screen("failure_screen")
+    object SuccessScreen:Screen("success_screen")
 }
 
 @Composable
@@ -74,7 +76,8 @@ fun Navigation() {
                     selected = navController.currentDestination?.route == Screen.Home.route,
                     onClick = { navController.navigate(Screen.Home.route) },
                     label = { Text("Home") },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home Icon")})
+                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home Icon")}
+                )
                 NavigationBarItem(
                     selected = navController.currentDestination?.route == Screen.Search.route,
                     onClick = { navController.navigate(Screen.Search.route) },
@@ -193,7 +196,13 @@ fun Navigation() {
                 if (url.isNotEmpty()) {
                     PaymentScreen(
                         navController = navController,
-                        url = url
+                        url = url,
+                        onPaymentSuccess = {
+                            navController.navigate(Screen.SuccessScreen.route)
+                        },
+                        onPaymentFailure = {
+                            navController.navigate(Screen.FailureScreen.route)
+                        }
                     )
                 }
             }

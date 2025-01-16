@@ -1,6 +1,7 @@
 package com.example.book_flight_mobile.ui.screens.search.listsearch
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -72,6 +73,7 @@ import com.example.book_flight_mobile.models.FlightResponse
 import com.example.book_flight_mobile.models.PlaneResponse
 import com.example.book_flight_mobile.repositories.MainLog
 import com.example.book_flight_mobile.ui.screens.search.SearchModelView
+import com.example.book_flight_mobile.ui.screens.search.SearchUiState
 import com.example.book_flight_mobile.ui.screens.utils.CardLoading
 import com.example.book_flight_mobile.ui.screens.utils.EmptyFlight
 import com.example.book_flight_mobile.ui.screens.utils.base64ToBitmap
@@ -83,7 +85,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -110,6 +111,7 @@ fun SearchListScreen(
     var selectedDate by remember { mutableStateOf(daysList.first()) }
     LaunchedEffect(Unit) {
         viewModel.searchRequest(flightRequest)
+        viewModel.checkToken()
     }
 
     ModalBottomSheetLayout(
@@ -142,7 +144,8 @@ fun SearchListScreen(
                     seats = emptyList(),
                     luggages = emptyList()
                 ),
-                navController = navController
+                navController = navController,
+                uiState = uiState
             )
         },
         sheetBackgroundColor = Color.White,
@@ -266,7 +269,7 @@ fun SearchListScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState, flightResponse: FlightResponse,navController: NavHostController) {
+fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState, flightResponse: FlightResponse,navController: NavHostController,uiState: SearchUiState) {
     Column(
         modifier = Modifier
             .background(Color(0xFFF5F5FA))
@@ -520,7 +523,11 @@ fun FlightDetailContent(scope: CoroutineScope, sheetState: ModalBottomSheetState
                 .height(50.dp)
                 .padding(4.dp)
                 .clickable {
-                    navController.navigate("${Screen.SummaryTicket.route}?id=${flightResponse.id}")
+                    if(uiState.token){
+                         navController.navigate("${Screen.SummaryTicket.route}?id=${flightResponse.id}")
+                    }else {
+
+                    }
                 }
                 .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp))
                 .padding(12.dp)
@@ -1019,7 +1026,6 @@ fun ListDay(date: LocalDate, dateFormatter: DateTimeFormatter, isSelected: Boole
         }
     }
 }
-
 
 @Composable
 fun CustomTopBarSearch(title: String, navController: NavHostController) {

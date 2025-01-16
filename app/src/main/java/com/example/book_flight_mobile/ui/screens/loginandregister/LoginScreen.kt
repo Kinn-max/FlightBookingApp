@@ -124,7 +124,7 @@ fun LoginScreen(
                                     .fillMaxWidth()
                                     .height(50.dp)
                                     .padding(4.dp)
-                                    .clickable { viewModel.login() }
+                                    .clickable { viewModel.login(navController) }
                                     .background(Color(0xFF1A94FF), shape = RoundedCornerShape(4.dp))
                                     .padding(12.dp)
                             ) {
